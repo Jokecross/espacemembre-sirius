@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-canvas text-ink font-body antialiased;
+    font-weight: 500;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3 {
+    @apply font-title text-navy;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  /* Les grands titres en Anton, capitales, comme sur la page de vente.
+     Anton n'a qu'une graisse : on neutralise les font-extrabold des écrans
+     (sinon le navigateur fabrique un faux gras). Ses capitales accentuées
+     mordent sur la ligne du dessus sous 1,16. */
+  h1, h2 {
+    font-family: Anton, Impact, sans-serif !important;
+    font-weight: 400 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.005em;
+    line-height: 1.16;
+  }
+
+  ::selection {
+    @apply bg-accent text-on-accent;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-canvas;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-line bg-surface shadow-card;
+  }
+
+  /* Les cartes cliquables se soulèvent légèrement : c'est le seul indice
+     qui distingue un bloc décoratif d'un bloc sur lequel on peut appuyer. */
+  .card-link {
+    @apply card transition duration-200 hover:-translate-y-0.5 hover:border-accent/30 hover:shadow-lift;
+  }
+
+  /* Le bouton de la page de vente : rouge plein, texte blanc en capitales. */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3
+           font-body font-semibold uppercase tracking-[0.08em] text-on-accent transition duration-150
+           disabled:cursor-not-allowed disabled:opacity-50;
+    background: #AE0000;
+    box-shadow: 0 10px 24px -12px rgba(174, 0, 0, 0.7);
+  }
+  .btn:hover:not(:disabled) {
+    filter: brightness(1.12);
+  }
+  .btn:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 4px 10px -6px rgba(174, 0, 0, 0.7);
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-line
+           bg-surface px-5 py-2.5 font-bold text-navy transition
+           hover:border-line-strong hover:bg-canvas;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-line bg-surface px-4 py-3 text-navy
+           transition placeholder:text-muted focus:border-accent focus:outline-none
+           focus:ring-4 focus:ring-accent/10;
+  }
+
+  .eyebrow {
+    @apply text-xs font-extrabold uppercase tracking-[0.16em] text-muted;
+  }
+
+  .pill {
+    @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1
+           text-xs font-bold;
+  }
+  /* Rouge sur fond rouge sombre se lirait mal : la pastille passe en aplat. */
+  .pill-accent { @apply bg-accent text-on-accent; }
+  .pill-success { @apply bg-success-bg text-success; }
+  .pill-muted { @apply bg-canvas text-muted; }
+}
