@@ -32,8 +32,8 @@ export default function Admin({ role }) {
       <h1 className="text-2xl">Back-office</h1>
       {!admin && (
         <p className="mt-2 text-sm">
-          Génère ici le lien d'accès de la personne que tu viens d'inscrire, mensuel ou
-          annuel, et envoie-le-lui juste après l'appel.
+          Génère ici le lien d'accès de la personne que tu viens d'inscrire, avec sa formule,
+          et envoie-le-lui juste après l'appel.
         </p>
       )}
 
@@ -192,7 +192,7 @@ function Invitations({ admin }) {
               return (
                 <tr key={i.token} className="border-b border-line last:border-0">
                   <td className="px-5 py-3 font-bold text-navy">{i.label || '—'}</td>
-                  <td className="px-5 py-3">{i.plan_code}</td>
+                  <td className="px-5 py-3">{plans.find((p) => p.code === i.plan_code)?.label || i.plan_code}</td>
                   {admin && (
                     <td className="px-5 py-3 text-muted">
                       {[equipe[i.created_by]?.first_name, equipe[i.created_by]?.last_name]
@@ -284,7 +284,7 @@ function Etapes() {
     <form onSubmit={enregistrer} className="card max-w-2xl space-y-4 p-6">
       <p className="text-sm">
         Ce bloc n'apparaît qu'aux élèves ayant terminé <b>tous les modules de leur formule</b> —
-        mensuel comme annuel. Personne ne le voit avant.
+        quelle qu'elle soit. Personne ne le voit avant.
       </p>
 
       <label className="flex items-center gap-3 text-sm font-bold text-navy">
@@ -662,8 +662,9 @@ function Formules() {
   return (
     <>
       <p className="text-sm">
-        Coche les modules compris dans chaque formule. Un élève ne voit que les siens, et
-        l'ordre de déblocage ne tient compte que de ceux-là.
+        Un nouveau module se coche tout seul : jusqu'au module 8 pour Mensuel Builder, 14 pour
+        Annuel Starter et 20 pour Annuel Builder. Tu peux changer une case à la main. Un élève
+        ne voit que ses modules, et l'ordre de déblocage ne tient compte que de ceux-là.
       </p>
 
       <div className="card mt-4 overflow-x-auto">

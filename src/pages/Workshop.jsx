@@ -16,7 +16,7 @@ import { OUTIL } from '../lib/marque'
  * (`mon_workshop`), pas le navigateur : le prompt d'un jour à venir n'est tout
  * simplement pas renvoyé. Changer l'heure de son ordinateur ne donne rien.
  *
- * Le jour 0 est ouvert à tous : il se fait en général pendant l'appel, mais
+ * Le jour 1 s'ouvre dès l'inscription. Le jour 0 est ouvert à tous : il se fait en général pendant l'appel, mais
  * certains ne l'ont pas fait ou doivent recommencer.
  */
 export default function Workshop() {
@@ -56,10 +56,9 @@ export default function Workshop() {
         <section className="mt-6 rounded-[18px] border border-line-strong bg-panel p-5 sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-8">
             <div className="min-w-0 flex-1">
-              <h2 className="text-[20px] sm:text-[22px]">Regarde ton introduction pour ouvrir le jour 1</h2>
+              <h2 className="text-[20px] sm:text-[22px]">Regarde ton introduction</h2>
               <p className="mt-2 max-w-[46ch] text-[15px] leading-relaxed">
-                Quelques minutes de vidéo, et ton workshop démarre. C'est la seule chose qui te
-                sépare de ton premier prompt.
+                Quelques minutes de vidéo pour bien démarrer ton workshop.
               </p>
             </div>
             <Link to="/" className="btn whitespace-nowrap">

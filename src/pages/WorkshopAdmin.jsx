@@ -35,8 +35,8 @@ export default function WorkshopAdmin() {
 
       <h2 className="mt-8 text-lg">Les sept jours</h2>
       <p className="mt-1 text-sm">
-        Pour chaque jour : le ou les prompts, et une vidéo si besoin. Un jour s'ouvre à minuit, à
-        l'heure de l'élève, après le précédent. Les textes autour des prompts viennent du brief
+        Pour chaque jour : le ou les prompts, et une vidéo si besoin. Le jour 1 s'ouvre dès
+        l'inscription, puis un nouveau jour à chaque minuit, à l'heure de l'élève. Les textes autour des prompts viennent du brief
         Kairo et se changent dans le code.
       </p>
 

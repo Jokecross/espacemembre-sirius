@@ -127,7 +127,7 @@ function decider({ etat, intros, parcours, introFaite }) {
       texte: neuf
         ? `Sept jours, sept prompts à coller dans ${OUTIL} : ton ${APP} prend forme jour après jour.`
         : `Un prompt à coller dans ${OUTIL}. Quelques minutes, et ton ${APP} avance d'un cran.`,
-      details: neuf ? null : ['1 vidéo', '1 prompt à coller'],
+      details: neuf ? null : [etat.jour === 1 ? '2 prompts à coller' : '1 prompt à coller'],
       bouton: neuf ? 'Découvrir' : 'Continuer',
       lien: '/workshop',
     }

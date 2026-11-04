@@ -53,8 +53,8 @@ membre `setter` ou `admin`, automatiquement.
 
 ## Le rythme
 
-- Le workshop démarre à l'inscription. Chaque minuit, à l'heure de l'élève,
-  ouvre le jour suivant.
+- Le jour 1 s'ouvre dès l'inscription. Chaque minuit, à l'heure de l'élève,
+  ouvre le jour suivant. Le jour 0 reste ouvert à tous.
 - Avant le jour 3, seul le premier module (hors introduction) est ouvert ;
   au jour 3, toute la formule. Réglable dans **Workshop 7 jours**.
 - Les modules marqués « introduction » sont toujours ouverts.

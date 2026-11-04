@@ -84,7 +84,7 @@ export default function Contenu() {
 
   /* Les vidéos bonus sont des leçons, sans module à nommer : elles vivent
      dans un module « Vidéos bonus » que l'élève ne voit jamais comme tel.
-     Il est créé avec la première vidéo, et ouvert aux deux formules : sans
+     Il est créé avec la première vidéo, et ouvert à toutes les formules : sans
      cela, personne ne le verrait tant qu'on n'a pas pensé à le cocher. */
   async function addBonus(e) {
     e.preventDefault()
@@ -147,7 +147,7 @@ export default function Contenu() {
       <h2 className="mt-10 text-lg">Modules vidéo bonus</h2>
       <p className="mt-1 text-sm">
         Affichés sous « Ton programme » (TikTok Shop, etc.) : un titre et sa vidéo, rien
-        d'autre. Ouverts aux deux formules, dès l'arrivée de l'élève.
+        d'autre. Ouverts à toutes les formules, dès l'arrivée de l'élève.
       </p>
 
       <section className="card mt-4 overflow-hidden">
