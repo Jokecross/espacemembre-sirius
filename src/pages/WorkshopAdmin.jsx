@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase.js'
+import { JOURS, SECOURS } from '../lib/kairo.js'
 
 /**
  * Le back-office du workshop : le contenu des sept jours, et les deux
@@ -34,9 +35,9 @@ export default function WorkshopAdmin() {
 
       <h2 className="mt-8 text-lg">Les sept jours</h2>
       <p className="mt-1 text-sm">
-        Pour chaque jour : le titre, ce qu'on construit, les étapes, le prompt, puis ce qu'il faut
-        faire avant demain. Un jour s'ouvre à
-        minuit, à l'heure de l'élève, après le précédent.
+        Pour chaque jour : le ou les prompts, et une vidéo si besoin. Un jour s'ouvre à minuit, à
+        l'heure de l'élève, après le précédent. Les textes autour des prompts viennent du brief
+        Kairo et se changent dans le code.
       </p>
 
       <div className="mt-4 space-y-3">
@@ -73,7 +74,7 @@ function Reglages({ reglages, onChange }) {
         bandeau_lien_texte: form.bandeau_lien_texte,
         prompt_j0: form.prompt_j0 || null,
         video_systeme_url: form.video_systeme_url?.trim() || null,
-        prompt_secours: form.prompt_secours || null,
+        prompts_sos: form.prompts_sos,
         updated_at: new Date().toISOString(),
       })
       .eq('id', 1)
@@ -151,19 +152,25 @@ function Reglages({ reglages, onChange }) {
       </div>
 
       <div className="border-t border-line pt-4">
-        <label className="block text-sm">
-          <span className="font-bold text-navy">Le prompt de secours</span>
-          <span className="mt-0.5 block text-xs text-muted">
-            Commun aux sept jours : il s'affiche en bonus sous le jour 7, et chaque jour y renvoie.
-          </span>
-          <textarea
-            className="field mt-2 font-mono text-xs"
-            rows={8}
-            value={form.prompt_secours || ''}
-            onChange={(e) => setForm({ ...form, prompt_secours: e.target.value })}
-            placeholder="Quelque chose ne marche plus dans mon premier site : […]"
-          />
-        </label>
+        <span className="block text-sm font-bold text-navy">Les prompts « Si ça ne marche pas »</span>
+        <span className="mt-0.5 block text-xs text-muted">
+          Ouverts à tous les élèves, quel que soit leur jour.
+        </span>
+        <div className="mt-2 space-y-2">
+          {SECOURS.prompts.map((p) => (
+            <details key={p.id} className="rounded-xl border border-line p-3">
+              <summary className="cursor-pointer text-sm font-bold text-navy">{p.titre}</summary>
+              <textarea
+                className="field mt-3 font-mono text-xs"
+                rows={8}
+                value={form.prompts_sos?.[p.id] || ''}
+                onChange={(e) =>
+                  setForm({ ...form, prompts_sos: { ...form.prompts_sos, [p.id]: e.target.value } })
+                }
+              />
+            </details>
+          ))}
+        </div>
       </div>
 
       <div className="border-t border-line pt-4">
@@ -203,13 +210,14 @@ function Reglages({ reglages, onChange }) {
 
 function JourAdmin({ jour: j, ouvert, onToggle, onSave }) {
   const [form, setForm] = useState(j)
-  const [etapes, setEtapes] = useState(() => etapesDe(j))
   const [busy, setBusy] = useState(false)
   const [erreur, setErreur] = useState('')
 
+  const page = JOURS.find((x) => x.jour === j.jour)
+  const prompts = page.blocs.filter((b) => b.type === 'prompt')
+
   useEffect(() => {
     setForm(j)
-    setEtapes(etapesDe(j))
   }, [j])
 
   async function enregistrer() {
@@ -218,11 +226,9 @@ function JourAdmin({ jour: j, ouvert, onToggle, onSave }) {
     const { error } = await supabase
       .from('workshop_jours')
       .update({
-        titre: form.titre?.trim() || `Jour ${j.jour}`,
-        resume: form.resume?.trim() || null,
         video_url: form.video_url || null,
-        etapes: etapes.map((e) => e.trim()).filter(Boolean),
         prompt: form.prompt || null,
+        prompt_2: form.prompt_2 || null,
         consignes: form.consignes?.trim() || null,
         updated_at: new Date().toISOString(),
       })
@@ -232,153 +238,72 @@ function JourAdmin({ jour: j, ouvert, onToggle, onSave }) {
     onSave()
   }
 
-  function changer(i, texte) {
-    setEtapes(etapes.map((e, k) => (k === i ? texte : e)))
-  }
-
-  function deplacer(i, sens) {
-    const k = i + sens
-    if (k < 0 || k >= etapes.length) return
-    const copie = [...etapes]
-    ;[copie[i], copie[k]] = [copie[k], copie[i]]
-    setEtapes(copie)
-  }
-
-  const nbEtapes = etapesDe(j).length
-  const pret = nbEtapes > 0 && j.prompt
-  const titre = (j.titre || '').trim()
+  const caracteres = (j.prompt?.length || 0) + (j.prompt_2?.length || 0)
 
   return (
     <div className="card p-4">
       <div className="flex flex-wrap items-center gap-3">
         <span
           className={`grid h-8 w-8 flex-none place-items-center rounded-full text-sm font-bold ${
-            pret ? 'bg-success-bg text-success' : 'bg-canvas text-muted'
+            j.prompt ? 'bg-success-bg text-success' : 'bg-canvas text-muted'
           }`}
         >
-          {pret ? '✓' : j.jour}
+          {j.prompt ? '✓' : j.jour}
         </span>
         <div className="min-w-0 flex-1">
           <b className="block font-title text-navy">
-            Jour {j.jour}
-            {titre && titre !== `Jour ${j.jour}` ? ` · ${titre}` : ''}
+            Jour {j.jour} · {page.titre}
           </b>
           <span className="text-xs text-muted">
-            {nbEtapes ? `${nbEtapes} étape${nbEtapes > 1 ? 's' : ''}` : 'Pas d’étapes'} ·{' '}
-            {j.prompt ? `${j.prompt.length.toLocaleString('fr-FR')} caractères de prompt` : 'Pas de prompt'}
+            {j.prompt ? `${caracteres.toLocaleString('fr-FR')} caractères de prompt` : 'Pas de prompt'}
             {j.video_url ? ' · Vidéo' : ''}
           </span>
         </div>
-        <button onClick={onToggle} className="text-sm font-bold text-accent hover:underline">
+        <button onClick={onToggle} className="text-sm font-bold text-accent-light hover:underline">
           {ouvert ? 'Fermer' : 'Modifier'}
         </button>
       </div>
 
       {ouvert && (
         <div className="mt-4 space-y-5">
-          <label className="block text-sm">
-            <span className="font-bold text-navy">Titre</span>
-            <span className="mt-0.5 block text-xs text-muted">
-              L'élève lit « Jour {j.jour} · » suivi de ce titre.
-            </span>
-            <input
-              className="field mt-2"
-              value={form.titre === `Jour ${j.jour}` ? '' : form.titre || ''}
-              onChange={(e) => setForm({ ...form, titre: e.target.value })}
-              placeholder="ex. Tes produits"
-            />
-          </label>
-
-          <label className="block text-sm">
-            <span className="font-bold text-navy">Ce qu'on construit aujourd'hui</span>
-            <span className="mt-0.5 block text-xs text-muted">
-              Une ou deux phrases, en tête du jour.
-            </span>
-            <textarea
-              className="field mt-2"
-              rows={2}
-              value={form.resume || ''}
-              onChange={(e) => setForm({ ...form, resume: e.target.value })}
-              placeholder="ex. Ta page Produits : tu ajoutes tes idées de produits…"
-            />
-          </label>
-
-          <div className="text-sm">
-            <span className="font-bold text-navy">Les étapes</span>
-            <span className="mt-0.5 block text-xs text-muted">
-              Autant que tu veux, dans l'ordre. L'élève les voit numérotées, avant le prompt.
-            </span>
-
-            <ol className="mt-2 space-y-2">
-              {etapes.map((e, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <span className="mt-2.5 grid h-6 w-6 flex-none place-items-center rounded-full bg-canvas font-title text-xs font-extrabold text-accent">
-                    {i + 1}
-                  </span>
-                  <textarea
-                    className="field min-w-0 flex-1"
-                    rows={2}
-                    value={e}
-                    onChange={(ev) => changer(i, ev.target.value)}
-                    placeholder={`Étape ${i + 1}`}
-                  />
-                  <span className="mt-1.5 flex flex-none flex-col gap-0.5">
-                    <Petit titre="Monter" onClick={() => deplacer(i, -1)} disabled={i === 0}>↑</Petit>
-                    <Petit titre="Descendre" onClick={() => deplacer(i, 1)} disabled={i === etapes.length - 1}>↓</Petit>
-                  </span>
-                  <Petit titre="Supprimer" onClick={() => setEtapes(etapes.filter((_, k) => k !== i))} className="mt-3">
-                    ✕
-                  </Petit>
-                </li>
-              ))}
-            </ol>
-
-            <button
-              type="button"
-              onClick={() => setEtapes([...etapes, ''])}
-              className="btn-ghost mt-3 text-[13.5px]"
-            >
-              + Ajouter une étape
-            </button>
-          </div>
-
-          <label className="block text-sm">
-            <span className="font-bold text-navy">Le prompt</span>
-            <span className="mt-0.5 block text-xs text-muted">
-              Affiché sous les étapes, avec un bouton pour le copier.
-            </span>
-            <textarea
-              className="field mt-2 font-mono text-xs"
-              rows={10}
-              value={form.prompt || ''}
-              onChange={(e) => setForm({ ...form, prompt: e.target.value })}
-              placeholder="Le prompt à coller dans Base44"
-            />
-          </label>
+          {prompts.map((p, i) => {
+            const colonne = i === 0 ? 'prompt' : 'prompt_2'
+            return (
+              <label key={p.id} className="block text-sm">
+                <span className="font-bold text-navy">{p.titre}</span>
+                <textarea
+                  className="field mt-2 font-mono text-xs"
+                  rows={10}
+                  value={form[colonne] || ''}
+                  onChange={(e) => setForm({ ...form, [colonne]: e.target.value })}
+                  placeholder="Le prompt à coller dans Base44"
+                />
+              </label>
+            )
+          })}
 
           <label className="block text-sm">
             <span className="font-bold text-navy">Avant demain</span>
             <span className="mt-0.5 block text-xs text-muted">
-              Ce que l'élève doit avoir fait avant le jour suivant. Affiché sous le prompt.
+              Facultatif. Affiché en bas de la page du jour.
             </span>
             <textarea
               className="field mt-2"
               rows={2}
               value={form.consignes || ''}
               onChange={(e) => setForm({ ...form, consignes: e.target.value })}
-              placeholder="ex. Ajoute 5 produits et analyse-les avec l'IA."
             />
           </label>
 
           <details className="rounded-xl border border-line p-3">
-            <summary className="cursor-pointer text-sm font-bold text-accent">
+            <summary className="cursor-pointer text-sm font-bold text-navy">
               Facultatif : une vidéo pour ce jour
             </summary>
             <input
               className="field mt-3"
               value={form.video_url || ''}
               onChange={(e) => setForm({ ...form, video_url: e.target.value })}
-              placeholder="Lien Loom, Vimeo, YouTube ou Google Drive — affiché au-dessus des étapes"
+              placeholder="Lien Loom, Vimeo, YouTube ou Google Drive, affiché au-dessus des étapes"
             />
           </details>
 
@@ -390,25 +315,4 @@ function JourAdmin({ jour: j, ouvert, onToggle, onSave }) {
       )}
     </div>
   )
-}
-
-function Petit({ titre, onClick, disabled, className = '', children }) {
-  return (
-    <button
-      type="button"
-      title={titre}
-      aria-label={titre}
-      onClick={onClick}
-      disabled={disabled}
-      className={`grid h-6 w-6 place-items-center rounded-md text-xs font-bold text-muted transition
-                  hover:bg-canvas hover:text-navy disabled:opacity-30 disabled:hover:bg-transparent ${className}`}
-    >
-      {children}
-    </button>
-  )
-}
-
-/** Les étapes enregistrées, sans les lignes vides. */
-function etapesDe(j) {
-  return Array.isArray(j.etapes) ? j.etapes.filter((e) => typeof e === 'string' && e.trim()) : []
 }

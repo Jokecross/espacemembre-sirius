@@ -8,6 +8,8 @@ import Admin from './pages/Admin.jsx'
 import Invite from './pages/Invite.jsx'
 import Outils from './pages/Outils.jsx'
 import Workshop from './pages/Workshop.jsx'
+import WorkshopJour from './pages/WorkshopJour.jsx'
+import WorkshopSecours from './pages/WorkshopSecours.jsx'
 import BandeauWorkshop from './components/BandeauWorkshop.jsx'
 import Coquille from './components/Coquille.jsx'
 import GuideBienvenue from './components/GuideBienvenue.jsx'
@@ -99,6 +101,8 @@ export default function App() {
           <Route path="/lecon/:lessonId" element={<Lesson />} />
           <Route path="/outils" element={<Outils />} />
           <Route path="/workshop" element={<Workshop />} />
+          <Route path="/workshop/jour/:n" element={<WorkshopJour />} />
+          <Route path="/workshop/si-ca-ne-marche-pas" element={<WorkshopSecours />} />
           <Route
             path="/admin"
             element={equipe ? <Admin role={member.role} /> : <Navigate to="/" replace />}

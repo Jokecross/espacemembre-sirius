@@ -317,7 +317,8 @@ function Workshop({ onSuivant }) {
       <p className="mt-4 text-[15px] leading-relaxed">
         Chaque jour, un prompt à coller dans {OUTIL}. Et chaque jour, ton {APP} sait faire
         une chose de plus, jusqu'à ce que tu aies de quoi aller chercher ton premier client.
-        [À COMPLÉTER : ce que le workshop construit, jour par jour, une fois les prompts écrits.]
+        Au programme : ton agence et ton coach, l'audit, la démo du site, le kit Google et
+        contenu, le message d'approche, le suivi, puis le devis et l'argent.
       </p>
 
       <p className="mt-3 text-[15px] leading-relaxed">

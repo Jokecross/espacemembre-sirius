@@ -10,7 +10,7 @@ Vercel ; données, comptes et vidéos dans le projet Supabase d'Anthony, partag�
 avec la page de vente et le CRM des setters.
 
 Noms affichés : `src/lib/marque.js` (MARQUE Sirius, OFFRE Programme 7 jours,
-OUTIL Base44, APP « premier site », provisoires).
+OUTIL Base44, APP « outil Kairo »).
 
 ```
 src/lib/marque.js        nom de la marque, de l'offre et de l'outil d'IA
@@ -18,7 +18,11 @@ src/pages/Login.jsx      connexion (e-mail + mot de passe)
 src/pages/Invite.jsx     /bienvenue/<jeton> : l'élève crée son compte
 src/pages/Modules.jsx    accueil : prochaine action, modules, progression
 src/pages/Lesson.jsx     le lecteur et le bouton « j'ai terminé »
-src/pages/Workshop.jsx   les 7 jours : vidéo, prompts à copier, capture
+src/pages/Workshop.jsx   le parcours « Construis ton outil Kairo » : bandeau, liste des jours
+src/pages/WorkshopJour.jsx    une page par jour (0 à 7) : étapes, prompts, capture
+src/pages/WorkshopSecours.jsx la page « Si ça ne marche pas » (6 prompts)
+src/lib/kairo.js         les textes du parcours, générés depuis le brief
+scripts/kairo-generer.py régénère kairo.js et scripts/kairo-prompts.sql depuis le brief
 src/pages/Outils.jsx     les outils recommandés
 src/pages/Admin.jsx      back-office (invitations, suivi, contenu, formules…)
 src/pages/WorkshopAdmin.jsx  réglages du workshop, prompt du jour 0, les 7 jours
@@ -27,6 +31,10 @@ api/reset-password.js    un admin pose un nouveau mot de passe
 api/video-token.js       URL de lecture d'une leçon, après contrôle des droits
 api/resource-url.js      URL signée d'un document
 ```
+
+Les 16 prompts Kairo vivent dans la base, jamais dans le dépôt, qui est public :
+`scripts/kairo-prompts.sql` est ignoré par git. Ensuite, ils se corrigent dans
+le back-office, onglet Workshop 7 jours.
 
 La base s'installe avec `CRM Sirius/supabase/INSTALLATION.sql` (voir
 `supabase/LISEZMOI.md`).

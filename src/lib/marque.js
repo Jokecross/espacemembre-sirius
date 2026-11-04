@@ -13,6 +13,5 @@ export const OFFRE = 'Programme 7 jours'
 export const OUTIL = 'Base44'
 
 // Ce que ces prompts construisent, étape par étape. Écrit pour se lire
-// après « ton » : « ton premier site prend forme ».
-// [À CONFIRMER] avec Anthony : ce que le workshop construit vraiment.
-export const APP = 'premier site'
+// après « ton » : « ton outil Kairo prend forme ».
+export const APP = 'outil Kairo'
