@@ -56,7 +56,7 @@ export default function Contenu() {
   async function load() {
     const { data, error } = await supabase
       .from('modules')
-      .select('id, position, title, is_intro, is_bonus, lessons(id, module_id, position, title, video_path, vimeo_url, document_path, document_name, avertissement)')
+      .select('id, position, title, is_intro, is_bonus, lessons(id, module_id, position, title, video_path, vimeo_url, document_path, document_name, avertissement, sous_video)')
       .order('position')
 
     // Une base pas encore migrée renvoie une erreur, pas une liste vide :
@@ -261,6 +261,7 @@ function Lesson({ lesson: l, onChange }) {
   const [vimeo, setVimeo] = useState('')
   const [editNote, setEditNote] = useState(false)
   const [note, setNote] = useState(l.avertissement || '')
+  const [editSous, setEditSous] = useState(false)
 
   async function upload(file) {
     if (!file) return
@@ -420,6 +421,14 @@ function Lesson({ lesson: l, onChange }) {
       >
         {l.avertissement ? '⚠️ Avertissement' : 'Avertissement'}
       </button>
+      {l.sous_video?.length > 0 && (
+        <button
+          onClick={() => setEditSous(!editSous)}
+          className="text-sm font-bold text-accent hover:underline"
+        >
+          Sous la vidéo
+        </button>
+      )}
       <input
         ref={docInput}
         type="file"
@@ -437,6 +446,8 @@ function Lesson({ lesson: l, onChange }) {
       <button onClick={remove} className="text-sm font-bold text-muted hover:text-red-600">
         ✕
       </button>
+
+      {editSous && <SousVideoAdmin lecon={l} onFini={() => { setEditSous(false); onChange() }} />}
 
       {editNote && (
         <div className="w-full">
@@ -492,5 +503,78 @@ function Lesson({ lesson: l, onChange }) {
       )}
       {error && <p className="w-full text-sm font-semibold text-red-600">{error}</p>}
     </li>
+  )
+}
+
+/** Les textes sous une vidéo, et le lien de ressources à coller. */
+function SousVideoAdmin({ lecon, onFini }) {
+  const [blocs, setBlocs] = useState(lecon.sous_video)
+  const [busy, setBusy] = useState(false)
+  const [erreur, setErreur] = useState('')
+
+  const changer = (i, patch) => setBlocs(blocs.map((b, k) => (k === i ? { ...b, ...patch } : b)))
+
+  async function enregistrer() {
+    setBusy(true)
+    setErreur('')
+    const propres = blocs.map((b) => (b.type === 'lien' ? { ...b, url: b.url?.trim() || null } : b))
+    const { error } = await supabase.from('lessons').update({ sous_video: propres }).eq('id', lecon.id)
+    setBusy(false)
+    if (error) return setErreur(`Enregistrement impossible : ${error.message}`)
+    onFini()
+  }
+
+  return (
+    <div className="w-full space-y-4 rounded-xl border border-line p-3">
+      {blocs.map((b, i) => (
+        <div key={i} className="text-sm">
+          {b.type === 'lien' && (
+            <label className="block">
+              <span className="font-bold text-navy">Le lien de la page de ressources</span>
+              <span className="mt-0.5 block text-xs text-muted">Vide, rien ne s'affiche sous la vidéo.</span>
+              <input
+                className="field mt-2"
+                value={b.url || ''}
+                onChange={(e) => changer(i, { url: e.target.value })}
+                placeholder="https://…"
+              />
+            </label>
+          )}
+          {(b.type === 'copie' || b.type === 'note') && (
+            <label className="block">
+              <span className="font-bold text-navy">{b.titre || 'Texte'}</span>
+              <textarea
+                className="field mt-2"
+                rows={b.type === 'note' ? 2 : 8}
+                value={b.texte}
+                onChange={(e) => changer(i, { texte: e.target.value })}
+              />
+            </label>
+          )}
+          {b.type === 'groupe' && (
+            <>
+              <span className="font-bold text-navy">{b.titre}</span>
+              {b.items.map((it, k) => (
+                <textarea
+                  key={k}
+                  className="field mt-2"
+                  rows={3}
+                  value={it.texte}
+                  onChange={(e) =>
+                    changer(i, {
+                      items: b.items.map((x, n) => (n === k ? { ...x, texte: e.target.value } : x)),
+                    })
+                  }
+                />
+              ))}
+            </>
+          )}
+        </div>
+      ))}
+      <button onClick={enregistrer} disabled={busy} className="btn-ghost">
+        {busy ? 'Enregistrement…' : 'Enregistrer'}
+      </button>
+      {erreur && <p className="text-sm font-semibold text-red-600">{erreur}</p>}
+    </div>
   )
 }

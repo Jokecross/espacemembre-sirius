@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
 import Icone from '../components/Icone.jsx'
 import Anneau from '../components/Anneau.jsx'
@@ -227,6 +227,14 @@ function TuileChiffre({ titre, valeur, total }) {
 function CarteModule({ id, module: m, numero, raison, ouvert, onToggle }) {
   const part = Number(m.completion) || 0
   const fini = part >= 1
+  const navigate = useNavigate()
+  // Un module d'une seule vidéo : un appui l'ouvre, sans liste à déplier.
+  const uneVideo = Number(m.lesson_count) === 1
+
+  async function ouvrirVideo() {
+    const { data } = await supabase.from('lessons').select('id').eq('module_id', m.id).limit(1).maybeSingle()
+    if (data) navigate(`/lecon/${data.id}`)
+  }
 
   if (!m.unlocked) {
     return (
@@ -251,7 +259,7 @@ function CarteModule({ id, module: m, numero, raison, ouvert, onToggle }) {
           : 'border border-line shadow-card hover:border-accent/25'
       }`}
     >
-      <button onClick={onToggle} className="flex w-full items-center gap-3.5 p-4 text-left sm:px-5">
+      <button onClick={uneVideo ? ouvrirVideo : onToggle} className="flex w-full items-center gap-3.5 p-4 text-left sm:px-5">
         <span
           className={`grid h-[38px] w-[38px] flex-none place-items-center rounded-xl font-title text-sm font-extrabold ${
             fini ? 'bg-success-bg text-success' : 'bg-accent text-on-accent'
@@ -263,7 +271,9 @@ function CarteModule({ id, module: m, numero, raison, ouvert, onToggle }) {
         <span className="min-w-0 flex-1">
           <b className="block font-title text-[15px] font-extrabold text-navy">{m.title}</b>
           <span className="text-[13px] text-muted">
-            {fini
+            {uneVideo
+              ? fini ? 'Vidéo vue' : 'À regarder'
+              : fini
               ? `${m.lesson_count} leçons · terminé`
               : `${m.done_count} leçon${m.done_count > 1 ? 's' : ''} sur ${m.lesson_count} · en cours`}
           </span>
@@ -278,7 +288,7 @@ function CarteModule({ id, module: m, numero, raison, ouvert, onToggle }) {
         />
       </button>
 
-      {ouvert && <ListeLecons moduleId={m.id} />}
+      {ouvert && !uneVideo && <ListeLecons moduleId={m.id} />}
     </section>
   )
 }

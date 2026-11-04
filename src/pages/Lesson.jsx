@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
 import OutilsSousVideo from '../components/OutilsSousVideo.jsx'
+import SousVideo from '../components/SousVideo.jsx'
 import Icone from '../components/Icone.jsx'
-import Anneau from '../components/Anneau.jsx'
 
 export default function Lesson() {
   const { lessonId } = useParams()
@@ -12,9 +12,9 @@ export default function Lesson() {
   const [video, setVideo] = useState(null) // null = pas encore reçu ; { kind, url }
   const [done, setDone] = useState(false)
   const [error, setError] = useState('')
-  // Les leçons du module, pour la colonne de droite : savoir où on en est
-  // et ce qui vient après compte autant que la vidéo elle-même.
-  const [voisines, setVoisines] = useState(null)
+  // Tout le programme de l'élève, pour la colonne de droite : savoir où on
+  // en est et ce qui vient après compte autant que la vidéo elle-même.
+  const [programme, setProgramme] = useState(null)
 
   useEffect(() => {
     let alive = true
@@ -25,7 +25,7 @@ export default function Lesson() {
     // introuvable, et on repart à l'accueil.
     supabase
       .from('lessons')
-      .select('id, title, module_id, position, avertissement, modules(title, position)')
+      .select('id, title, module_id, position, avertissement, sous_video, modules(title, position)')
       .eq('id', lessonId)
       .maybeSingle()
       .then(async ({ data, error: dbError }) => {
@@ -48,17 +48,25 @@ export default function Lesson() {
           .maybeSingle()
         if (alive) setDone(!!p)
 
-        const [{ data: liste }, { data: vues }] = await Promise.all([
-          supabase
-            .from('lessons')
-            .select('id, position, title, duration_seconds')
-            .eq('module_id', data.module_id)
-            .order('position'),
+        const [{ data: mods }, { data: liste }, { data: vues }] = await Promise.all([
+          supabase.rpc('my_modules'),
+          // RLS ne renvoie que les vidéos ouvertes : les autres restent
+          // visibles dans la liste, mais sans lien.
+          supabase.from('lessons').select('id, module_id, position, title, duration_seconds').order('position'),
           supabase.from('lesson_progress').select('lesson_id'),
         ])
         if (!alive) return
         const faites = new Set((vues || []).map((v) => v.lesson_id))
-        setVoisines((liste || []).map((l) => ({ ...l, vue: faites.has(l.id) })))
+        setProgramme(
+          (mods || [])
+            .filter((m) => !m.is_intro && !m.is_bonus)
+            .flatMap((m) => {
+              const siennes = (liste || []).filter((l) => l.module_id === m.id)
+              return siennes.length
+                ? siennes.map((l) => ({ ...l, vue: faites.has(l.id), ouverte: true }))
+                : [{ id: `module-${m.id}`, title: m.title, vue: false, ouverte: false }]
+            })
+        )
 
         // L'URL de lecture est signée côté serveur et expire au bout de
         // trois heures : copiée ailleurs, elle ne sert plus très longtemps.
@@ -80,13 +88,19 @@ export default function Lesson() {
     if (done) {
       await supabase.from('lesson_progress').delete().eq('lesson_id', lesson.id)
       setDone(false)
+      marquer(false)
     } else {
       const { data: s } = await supabase.auth.getSession()
       await supabase
         .from('lesson_progress')
         .insert({ lesson_id: lesson.id, member_id: s.session.user.id })
       setDone(true)
+      marquer(true)
     }
+  }
+
+  function marquer(vue) {
+    setProgramme((p) => p?.map((l) => (String(l.id) === String(lesson.id) ? { ...l, vue } : l)) ?? p)
   }
 
   if (!lesson) return <p className="text-muted">Chargement…</p>
@@ -95,10 +109,11 @@ export default function Lesson() {
   // qu'à son document.
   const sansVideo = !!video && !video.kind && !error
 
-  const total = voisines?.length || 0
-  const faites = voisines?.filter((l) => l.vue).length || 0
-  const indice = voisines?.findIndex((l) => String(l.id) === String(lesson.id)) ?? -1
-  const suivante = indice >= 0 ? voisines?.[indice + 1] : null
+  const total = programme?.length || 0
+  const faites = programme?.filter((l) => l.vue).length || 0
+  const indice = programme?.findIndex((l) => String(l.id) === String(lesson.id)) ?? -1
+  const suivante = indice >= 0 ? programme?.[indice + 1] : null
+  const numero = indice >= 0 ? indice + 1 : lesson.modules?.position
 
   return (
     <>
@@ -116,7 +131,8 @@ export default function Lesson() {
         {/* ---------- La vidéo ---------- */}
         <div className="min-w-0">
           <p className="eyebrow">
-            Module {lesson.modules?.position} · {lesson.modules?.title}
+            Module {numero}
+            {total > 0 && <span className="text-muted"> sur {total}</span>}
           </p>
           <h1 className="mt-2 font-title text-[23px] font-extrabold leading-tight tracking-tight text-navy sm:text-[28px]">
             {lesson.title}
@@ -187,24 +203,29 @@ export default function Lesson() {
                 {video.document.name || 'Le document de la leçon'}
               </a>
             )}
+
+            {suivante?.ouverte && (
+              <Link to={`/lecon/${suivante.id}`} className="btn-ghost">
+                Module suivant <Icone nom="fleche" taille={16} />
+              </Link>
+            )}
           </div>
+
+          <SousVideo blocs={lesson.sous_video} />
 
           <OutilsSousVideo />
         </div>
 
-        {/* ---------- Le module, à droite ---------- */}
-        {voisines && voisines.length > 1 && (
-          <aside>
+        {/* ---------- Le programme, à droite ---------- */}
+        {programme && programme.length > 1 && (
+          <aside className="min-w-0">
             <div className="card p-[18px] lg:sticky lg:top-6">
               <div className="flex items-baseline justify-between gap-2">
-                <p className="eyebrow">Module {lesson.modules?.position}</p>
-                <span className="text-xs font-bold text-accent">
+                <p className="eyebrow">Ton programme</p>
+                <span className="text-xs font-bold text-muted">
                   {faites} / {total}
                 </span>
               </div>
-              <b className="mt-1.5 block font-title text-[15px] font-extrabold text-navy">
-                {lesson.modules?.title}
-              </b>
 
               <span className="mt-3 block h-1.5 w-full overflow-hidden rounded-full bg-line">
                 <span
@@ -213,17 +234,11 @@ export default function Lesson() {
                 />
               </span>
 
-              <div className="mt-3.5 flex flex-col gap-0.5">
-                {voisines.map((l, i) => {
+              <div className="mt-3.5 flex max-h-[420px] flex-col gap-0.5 overflow-y-auto lg:max-h-[calc(100vh-190px)]">
+                {programme.map((l, i) => {
                   const actuelle = String(l.id) === String(lesson.id)
-                  return (
-                    <Link
-                      key={l.id}
-                      to={`/lecon/${l.id}`}
-                      className={`flex items-center gap-3 rounded-xl px-2.5 py-2.5 transition ${
-                        actuelle ? 'bg-accent-pastel' : 'hover:bg-canvas'
-                      }`}
-                    >
+                  const contenu = (
+                    <>
                       <span
                         className={`grid h-6 w-6 flex-none place-items-center rounded-full ${
                           l.vue
@@ -237,6 +252,8 @@ export default function Lesson() {
                           <Icone nom="valide" taille={13} epaisseur={2.4} />
                         ) : actuelle ? (
                           <Icone nom="lecture" taille={12} />
+                        ) : !l.ouverte ? (
+                          <Icone nom="cadenas" taille={12} />
                         ) : (
                           <span className="text-[11px] font-bold">{i + 1}</span>
                         )}
@@ -253,19 +270,22 @@ export default function Lesson() {
                           {Math.round(l.duration_seconds / 60)} min
                         </span>
                       )}
+                    </>
+                  )
+                  const classe = `flex items-center gap-3 rounded-xl px-2.5 py-2.5 transition ${
+                    actuelle ? 'bg-accent-pastel' : l.ouverte ? 'hover:bg-canvas' : 'opacity-60'
+                  }`
+                  return l.ouverte ? (
+                    <Link key={l.id} to={`/lecon/${l.id}`} className={classe}>
+                      {contenu}
                     </Link>
+                  ) : (
+                    <div key={l.id} className={classe}>
+                      {contenu}
+                    </div>
                   )
                 })}
               </div>
-
-              {suivante && (
-                <Link
-                  to={`/lecon/${suivante.id}`}
-                  className="mt-3.5 flex items-center gap-1.5 border-t border-line pt-3.5 text-[13px] font-bold text-accent"
-                >
-                  Leçon suivante <Icone nom="fleche" taille={15} />
-                </Link>
-              )}
             </div>
           </aside>
         )}
