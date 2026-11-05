@@ -113,7 +113,7 @@ export default function TourGuide({ onFini }) {
         style={carte}
       >
         <div className="flex items-center gap-2">
-          <span className="eyebrow text-accent">
+          <span className="eyebrow">
             {i + 1} / {ARRETS.length}
           </span>
           <span className="flex flex-1 gap-1">

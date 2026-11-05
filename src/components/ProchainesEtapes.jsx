@@ -30,7 +30,7 @@ export default function ProchainesEtapes({ termine }) {
   return (
     <section className="card mt-8 overflow-hidden border-accent/60 bg-panel text-white shadow-lift">
       <div className="p-7 sm:p-9">
-        <p className="text-xs font-extrabold uppercase tracking-[.14em] text-accent-light">
+        <p className="text-xs font-extrabold uppercase tracking-[.14em] text-muted">
           {offre.eyebrow || 'Les prochaines étapes'}
         </p>
 

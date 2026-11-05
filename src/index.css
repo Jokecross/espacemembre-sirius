@@ -3,8 +3,12 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    background: #050607;
+  }
+
   body {
-    @apply bg-canvas text-ink font-body antialiased;
+    @apply text-ink font-body antialiased;
     font-weight: 500;
     line-height: 1.6;
   }
@@ -27,6 +31,36 @@
     line-height: 1.16;
   }
 
+  /* La nuit de la page de vente, derrière tout l'espace : un ciel très
+     discret et une lueur rouge qui ne bouge pas au défilement. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,.5), transparent 60%),
+      radial-gradient(1px 1px at 34% 62%, rgba(255,255,255,.28), transparent 60%),
+      radial-gradient(1.4px 1.4px at 58% 11%, rgba(255,255,255,.55), transparent 60%),
+      radial-gradient(1px 1px at 71% 44%, rgba(255,255,255,.32), transparent 60%),
+      radial-gradient(1px 1px at 88% 76%, rgba(255,255,255,.4), transparent 60%),
+      radial-gradient(1.2px 1.2px at 23% 88%, rgba(255,255,255,.28), transparent 60%),
+      radial-gradient(1px 1px at 47% 33%, rgba(255,255,255,.2), transparent 60%),
+      radial-gradient(1px 1px at 93% 22%, rgba(255,255,255,.28), transparent 60%);
+    background-size: 520px 520px;
+    opacity: .55;
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(900px 420px at 70% -8%, rgba(174,0,0,.16), transparent 70%);
+  }
+
   ::selection {
     @apply bg-accent text-on-accent;
   }
@@ -38,45 +72,113 @@
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-line bg-surface shadow-card;
+    @apply rounded-[18px] border border-white/[.07] shadow-card;
+    background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012)), #0E0F10;
   }
 
   /* Les cartes cliquables se soulèvent légèrement : c'est le seul indice
      qui distingue un bloc décoratif d'un bloc sur lequel on peut appuyer. */
   .card-link {
-    @apply card transition duration-200 hover:-translate-y-0.5 hover:border-accent/30 hover:shadow-lift;
+    @apply card transition duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-lift;
   }
 
   /* Le bouton de la page de vente : rouge plein, texte blanc en capitales. */
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3
-           font-body font-semibold uppercase tracking-[0.08em] text-on-accent transition duration-150
+           font-body text-[14px] font-semibold uppercase tracking-[0.08em] text-on-accent transition duration-150
            disabled:cursor-not-allowed disabled:opacity-50;
     background: #AE0000;
-    box-shadow: 0 10px 24px -12px rgba(174, 0, 0, 0.7);
+    box-shadow: 0 1px 0 rgba(255,255,255,.18) inset, 0 12px 28px -14px rgba(174, 0, 0, 0.8);
   }
-  .btn:hover:not(:disabled) {
-    filter: brightness(1.12);
+  @media (hover: hover) {
+    .btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      filter: brightness(1.12);
+      box-shadow: 0 1px 0 rgba(255,255,255,.18) inset, 0 16px 34px -14px rgba(174, 0, 0, 0.95);
+    }
   }
   .btn:active:not(:disabled) {
-    transform: translateY(2px);
-    box-shadow: 0 4px 10px -6px rgba(174, 0, 0, 0.7);
+    transform: translateY(1px);
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-line
-           bg-surface px-5 py-2.5 font-bold text-navy transition
-           hover:border-line-strong hover:bg-canvas;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/[.12]
+           bg-white/[.03] px-5 py-3 text-[14px] font-semibold text-navy transition
+           hover:border-accent/60 hover:bg-accent/[.1];
   }
 
   .field {
-    @apply w-full rounded-xl border border-line bg-surface px-4 py-3 text-navy
+    @apply w-full rounded-xl border border-white/[.1] bg-canvas px-4 py-3 text-navy
            transition placeholder:text-muted focus:border-accent focus:outline-none
-           focus:ring-4 focus:ring-accent/10;
+           focus:ring-4 focus:ring-accent/20;
   }
 
   .eyebrow {
-    @apply text-xs font-extrabold uppercase tracking-[0.16em] text-muted;
+    @apply text-[11.5px] font-semibold uppercase tracking-[0.18em] text-muted;
+  }
+
+  /* Le mot clé d'un titre : l'aplat rouge de la page de vente. */
+  .mot-cle {
+    @apply inline-block bg-accent text-on-accent;
+    padding: 0 .16em;
+    line-height: 1.12;
+  }
+
+  /* La carte qui porte le poids de la page. */
+  .carte-phare {
+    @apply relative overflow-hidden rounded-[22px] border border-accent/50 p-6 sm:p-8;
+    background:
+      radial-gradient(520px 240px at 100% 0%, rgba(174,0,0,.28), transparent 70%),
+      linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.012)),
+      #0E0F10;
+    box-shadow: 0 1px 0 rgba(255,255,255,.06) inset, 0 30px 60px -36px rgba(0,0,0,.9);
+  }
+
+  /* Une ligne du programme : un numéro en grand, un titre, un état. */
+  .ligne-video {
+    @apply flex w-full items-center gap-4 rounded-2xl border border-white/[.07] px-4 py-3.5 text-left transition duration-200 sm:gap-5 sm:px-6 sm:py-4;
+    background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)), #0E0F10;
+  }
+  @media (hover: hover) {
+    button.ligne-video:hover, a.ligne-video:hover {
+      @apply border-accent/60;
+      transform: translateY(-1px);
+    }
+  }
+  .ligne-video.prochaine {
+    @apply border-accent/70;
+    background:
+      radial-gradient(340px 120px at 0% 50%, rgba(174,0,0,.22), transparent 70%),
+      linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
+      #0E0F10;
+  }
+  .ligne-video.verrou {
+    @apply border-white/[.05];
+    background: rgba(255,255,255,.012);
+  }
+  .num-video {
+    @apply w-9 flex-none font-display text-navy sm:w-11;
+    font-size: 27px;
+    line-height: 1;
+  }
+  .verrou .num-video {
+    @apply text-muted;
+    opacity: .5;
+  }
+  .rond-etat {
+    @apply grid h-9 w-9 flex-none place-items-center rounded-full;
+  }
+
+  /* L'apparition de chaque page, une seule fois. */
+  .page-in {
+    animation: page-in .5s cubic-bezier(.22, 1, .36, 1) both;
+  }
+  @keyframes page-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .page-in { animation: none; }
   }
 
   .pill {

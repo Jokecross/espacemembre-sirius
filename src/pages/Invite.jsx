@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
 import { MARQUE, OFFRE } from '../lib/marque'
+import Monogramme from '../components/Monogramme.jsx'
 
 /**
  * Page d'atterrissage d'un lien d'invitation, accessible sans compte.
@@ -56,12 +57,16 @@ export default function Invite() {
 
   return (
     <div className="grid min-h-screen place-items-center px-5">
-      <div className="card w-full max-w-md p-8 shadow-lift">
-        <div className="font-title text-lg font-extrabold tracking-tight text-navy">
-          {MARQUE} <span className="text-accent">{OFFRE}</span>
+      <div className="card page-in w-full max-w-md p-7 shadow-lift sm:p-9">
+        <div className="flex items-center gap-3">
+          <Monogramme />
+          <span>
+            <span className="block font-title text-[17px] font-bold leading-tight tracking-tight text-navy">{MARQUE}</span>
+            <span className="block text-[13px] font-semibold leading-tight text-muted">{OFFRE}</span>
+          </span>
         </div>
 
-        <h1 className="mt-6 text-xl">Crée ton accès</h1>
+        <h1 className="mt-7 text-[28px]">Crée ton <span className="mot-cle">accès</span></h1>
         <p className="mt-2 text-sm">
           Choisis un mot de passe et tu entres dans le programme. Ce lien ne fonctionne
           qu'une fois.
@@ -101,7 +106,7 @@ export default function Invite() {
             </p>
           </div>
 
-          {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
+          {error && <p className="text-sm font-semibold text-red-700">{error}</p>}
 
           <button className="btn w-full" disabled={state === 'sending'}>
             {state === 'sending' ? 'Création de ton accès…' : 'Entrer dans le programme'}

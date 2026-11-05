@@ -38,12 +38,12 @@ export default function WorkshopJour() {
       >
         ← Tous les jours
       </Link>
-      <h1 className="mt-1 text-[25px] sm:text-[31px]">
+      <h1 className="mt-2 text-[28px] sm:text-[38px]">
         Jour {page.jour} · {page.titre}
       </h1>
 
       {!ouvert ? (
-        <div className="card mt-6 flex items-center gap-3.5 p-5">
+        <div className="ligne-video verrou mt-6">
           <Icone nom="cadenas" taille={18} className="flex-none text-muted" />
           <p className="min-w-0 flex-1 text-sm">Ce jour n'est pas encore ouvert.</p>
           <Compte ouvreLe={j?.ouvre_le} />
@@ -51,7 +51,7 @@ export default function WorkshopJour() {
       ) : (
         <>
           <div className="mt-4">
-            <p className="eyebrow text-accent-light">Ce que tu construis aujourd'hui</p>
+            <p className="eyebrow">Ce que tu construis aujourd'hui</p>
             <p className="mt-1.5 max-w-[68ch] text-[15px] leading-relaxed text-navy">{page.construit}</p>
           </div>
 

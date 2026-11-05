@@ -35,13 +35,13 @@ export default function Workshop() {
   return (
     <>
       <p className="eyebrow">Ton workshop</p>
-      <h1 className="mt-1.5 text-[25px] sm:text-[31px]">Construis ton outil Kairo</h1>
+      <h1 className="mt-2 text-[28px] sm:text-[38px]">Construis ton outil <span className="mot-cle">Kairo</span></h1>
       <p className="mt-2.5 max-w-[62ch] text-[15px] leading-relaxed">
         Un prompt par jour à coller dans {OUTIL}. En 7 jours, tu as l'outil de ton agence IA.
       </p>
 
-      <section className="mt-6 rounded-[18px] border-[1.5px] border-accent/60 bg-surface p-5 sm:p-6">
-        <h2 className="text-[20px] sm:text-[22px]">Comment ça marche</h2>
+      <section className="carte-phare mt-6">
+        <h2 className="text-[22px] sm:text-[26px]">Comment ça marche</h2>
         <ul className="mt-3 space-y-2.5">
           {COMMENT_CA_MARCHE.map((point) => (
             <li key={point} className="flex gap-2.5 text-[14.5px] leading-relaxed text-navy">
@@ -53,7 +53,7 @@ export default function Workshop() {
       </section>
 
       {introAFaire ? (
-        <section className="mt-6 rounded-[18px] border border-line-strong bg-panel p-5 sm:p-6">
+        <section className="carte-phare mt-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-8">
             <div className="min-w-0 flex-1">
               <h2 className="text-[20px] sm:text-[22px]">Regarde ton introduction</h2>
@@ -95,16 +95,17 @@ export default function Workshop() {
               ouvert={page.jour === 0 || !!j?.ouvert}
               ouvreLe={j?.ouvre_le}
               capture={!!j?.capture_faite}
+              phare={page.jour === faits}
             />
           )
         })}
 
         <Link
           to="/workshop/si-ca-ne-marche-pas"
-          className="card-link flex items-center gap-3.5 p-4 sm:px-5"
+          className="ligne-video"
         >
-          <span className="grid h-[38px] w-[38px] flex-none place-items-center rounded-xl bg-panel text-navy">
-            <Icone nom="coach" taille={18} />
+          <span className="num-video grid place-items-center">
+            <Icone nom="coach" taille={22} />
           </span>
           <span className="min-w-0 flex-1">
             <b className="block font-title text-[15px] font-extrabold text-navy">Si ça ne marche pas</b>
@@ -117,7 +118,8 @@ export default function Workshop() {
   )
 }
 
-function CarteJour({ page, ouvert, ouvreLe, capture }) {
+function CarteJour({ page, ouvert, ouvreLe, capture, phare }) {
+  const numero = String(page.jour).padStart(2, '0')
   const texte = (
     <span className="min-w-0 flex-1">
       <b className="block font-title text-[15px] font-extrabold text-navy">
@@ -129,28 +131,25 @@ function CarteJour({ page, ouvert, ouvreLe, capture }) {
 
   if (!ouvert) {
     return (
-      <div className="card flex items-center gap-3.5 p-4 opacity-[.55] sm:px-5">
-        <span className="grid h-[38px] w-[38px] flex-none place-items-center rounded-xl bg-canvas text-muted">
-          <Icone nom="cadenas" taille={17} />
-        </span>
+      <div className="ligne-video verrou">
+        <span className="num-video">{numero}</span>
         {texte}
         <Compte ouvreLe={ouvreLe} />
+        <span className="rond-etat hidden text-muted/60 sm:grid">
+          <Icone nom="cadenas" taille={16} />
+        </span>
       </div>
     )
   }
 
   return (
-    <Link to={`/workshop/jour/${page.jour}`} className="card-link flex items-center gap-3.5 p-4 sm:px-5">
-      <span
-        className={`grid h-[38px] w-[38px] flex-none place-items-center rounded-xl font-title text-sm font-extrabold ${
-          page.jour === 0 ? 'bg-panel text-white' : 'bg-accent text-on-accent'
-        }`}
-      >
-        {page.jour}
-      </span>
+    <Link to={`/workshop/jour/${page.jour}`} className={`ligne-video ${phare ? 'prochaine' : ''}`}>
+      <span className="num-video">{numero}</span>
       {texte}
       {capture && <Icone nom="valide" taille={17} className="flex-none text-success" />}
-      <Icone nom="fleche" taille={18} className="flex-none text-navy" />
+      <span className={`rond-etat ${phare ? 'bg-accent text-on-accent' : 'border border-white/[.12] text-navy'}`}>
+        <Icone nom="fleche" taille={16} />
+      </span>
     </Link>
   )
 }
@@ -158,12 +157,12 @@ function CarteJour({ page, ouvert, ouvreLe, capture }) {
 /** La vidéo obligatoire, avant le jour 1 : elle explique le système. */
 function VideoSysteme({ url }) {
   return (
-    <section className="mt-6 rounded-[18px] border-[1.5px] border-accent/45 bg-surface p-5 sm:p-6">
+    <section className="carte-phare mt-6">
       <span className="pill pill-accent">
         <Icone nom="lecture" taille={14} /> Vidéo obligatoire
       </span>
       <h2 className="mt-3 text-[19px] sm:text-[22px]">À regarder pour comprendre le système</h2>
-      <div className="mt-4 aspect-video overflow-hidden rounded-[14px] bg-panel">
+      <div className="mt-4 aspect-video overflow-hidden rounded-[14px] bg-black">
         <iframe
           src={lecteur(url)}
           title="Vidéo obligatoire : comprendre le système"

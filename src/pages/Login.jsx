@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase.js'
 import { MARQUE, OFFRE } from '../lib/marque'
+import Monogramme from '../components/Monogramme.jsx'
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' })
@@ -31,12 +32,16 @@ export default function Login() {
 
   return (
     <div className="grid min-h-screen place-items-center px-5">
-      <div className="card w-full max-w-md p-8 shadow-lift">
-        <div className="font-title text-lg font-extrabold tracking-tight text-navy">
-          {MARQUE} <span className="text-accent">{OFFRE}</span>
+      <div className="card page-in w-full max-w-md p-7 shadow-lift sm:p-9">
+        <div className="flex items-center gap-3">
+          <Monogramme />
+          <span>
+            <span className="block font-title text-[17px] font-bold leading-tight tracking-tight text-navy">{MARQUE}</span>
+            <span className="block text-[13px] font-semibold leading-tight text-muted">{OFFRE}</span>
+          </span>
         </div>
 
-        <h1 className="mt-6 text-xl">Accéder à mon programme</h1>
+        <h1 className="mt-7 text-[28px]">Accéder à mon <span className="mot-cle">programme</span></h1>
         <p className="mt-2 text-sm">
           Entre l'adresse et le mot de passe que tu as choisis en activant ton accès.
         </p>
@@ -61,7 +66,7 @@ export default function Login() {
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
 
-          {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
+          {error && <p className="text-sm font-semibold text-red-700">{error}</p>}
 
           <button className="btn w-full" disabled={state === 'sending'}>
             {state === 'sending' ? 'Connexion…' : 'Me connecter'}

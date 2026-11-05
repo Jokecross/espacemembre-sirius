@@ -73,7 +73,7 @@ export default function PromptJ0() {
 
       <button
         onClick={() => setDeplie(!deplie)}
-        className="mt-3 text-sm font-bold text-accent hover:underline"
+        className="mt-3 text-sm font-semibold text-muted transition hover:text-navy"
       >
         {deplie ? 'Masquer le prompt' : 'Voir le prompt'}
       </button>

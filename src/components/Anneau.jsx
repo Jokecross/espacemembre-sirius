@@ -10,7 +10,7 @@ export default function Anneau({
   taille = 52,
   epaisseur = 5,
   couleur = '#AE0000',
-  fond = '#1A1C1D',
+  fond = 'rgba(255,255,255,.08)',
   texte,
   className = '',
 }) {

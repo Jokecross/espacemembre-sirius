@@ -121,7 +121,7 @@ function Header({ member, equipe }) {
     <header className="sticky top-0 z-40 border-b border-line bg-surface/85 backdrop-blur-md">
       <div className="mx-auto flex max-w-5xl items-center gap-4 px-5 py-3.5">
         <Link to="/" className="font-title text-lg font-extrabold tracking-tight text-navy">
-          {MARQUE} <span className="text-accent">{OFFRE}</span>
+          {MARQUE} <span className="text-muted">{OFFRE}</span>
         </Link>
 
         <div className="ml-auto flex items-center gap-4 text-sm">
@@ -137,7 +137,7 @@ function Header({ member, equipe }) {
           )}
 
           <div className="flex items-center gap-2">
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-accent-pastel font-title text-xs font-extrabold text-accent">
+            <span className="grid h-8 w-8 place-items-center rounded-full bg-accent font-title text-xs font-extrabold text-on-accent">
               {initiales(member)}
             </span>
             <span className="hidden font-semibold text-navy sm:inline">

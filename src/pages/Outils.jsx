@@ -24,12 +24,12 @@ export default function Outils() {
 
   return (
     <>
-      <Link to="/" className="text-sm font-bold text-accent hover:underline">
+      <Link to="/" className="text-sm font-semibold text-muted transition hover:text-navy">
         ← Retour au programme
       </Link>
 
       <p className="eyebrow mt-6">Ton équipement</p>
-      <h1 className="mt-1.5 text-3xl">Outils pour bien avancer</h1>
+      <h1 className="mt-2 text-[28px] sm:text-[38px]">Outils pour bien <span className="mot-cle">avancer</span></h1>
       <p className="mt-2 text-sm">
         Les outils qu'on utilise au quotidien, avec leurs liens et les éventuels codes de réduction.
       </p>
@@ -70,7 +70,7 @@ export default function Outils() {
                 <span className="font-title text-lg font-extrabold text-navy">
                   {t.promo_code}
                 </span>
-                <span className="text-sm font-bold text-accent">
+                <span className="text-sm font-bold text-navy">
                   {copied === t.id ? '✓ copié' : 'copier'}
                 </span>
               </button>

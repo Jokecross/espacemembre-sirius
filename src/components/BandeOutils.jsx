@@ -38,7 +38,7 @@ export default function BandeOutils() {
         </div>
         <Link
           to="/outils"
-          className="inline-flex items-center gap-1.5 text-[13.5px] font-bold text-accent hover:underline"
+          className="inline-flex items-center gap-1.5 text-[13.5px] font-semibold text-muted hover:text-navy hover:underline"
         >
           Tout voir <Icone nom="fleche" taille={15} />
         </Link>

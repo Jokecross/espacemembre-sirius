@@ -62,7 +62,7 @@ export default function GuideBienvenue({ etat, onFini }) {
 function Compteur({ etape }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="eyebrow text-accent">
+      <span className="eyebrow">
         Étape {etape + 1} / {TOTAL}
       </span>
       <span className="flex flex-1 gap-1.5">
@@ -87,7 +87,7 @@ function Bienvenue({ prenom, onSuivant }) {
       <h1 className="mt-5 text-[26px] leading-tight sm:text-3xl">
         Bienvenue dans ta formation
         <br />
-        <span className="text-accent">{MARQUE} {OFFRE}</span>
+        <span className="mot-cle">{MARQUE} {OFFRE}</span>
         {prenom ? `, ${prenom}` : ''}.
       </h1>
 
@@ -287,7 +287,7 @@ function Choix({ actif, onClick, children }) {
       className={`flex items-center gap-3 rounded-2xl border-[1.5px] px-4 py-3.5 text-left
                   font-bold transition ${
                     actif
-                      ? 'border-accent bg-accent-pastel text-accent'
+                      ? 'border-accent bg-accent-pastel text-navy'
                       : 'border-line bg-surface text-navy hover:border-line-strong'
                   }`}
     >
@@ -311,7 +311,7 @@ function Workshop({ onSuivant }) {
       <h1 className="mt-5 text-[26px] leading-tight sm:text-3xl">
         Ton {APP} se construit
         <br />
-        <span className="text-accent">en 7 jours</span>.
+        <span className="mot-cle">en 7 jours</span>.
       </h1>
 
       <p className="mt-4 text-[15px] leading-relaxed">

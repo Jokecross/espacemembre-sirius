@@ -44,34 +44,28 @@ export default function CarteAction({ etat, intros, parcours, introFaite, onOuvr
   }
 
   return (
-    <section className="relative mt-5 overflow-hidden rounded-[22px] border border-line-strong bg-panel p-6 shadow-[0_18px_40px_rgba(0,0,0,.18)] sm:p-8 lg:mt-7">
-      {/* Un halo très discret : assez pour que la carte ne soit pas un
-          rectangle plat, pas assez pour qu'on le remarque. */}
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-accent-light/[.14]"
-      />
+    <section className="carte-phare mt-6">
 
       <div className="relative flex flex-col items-stretch gap-5 sm:flex-row sm:items-center sm:gap-8">
         <div className="min-w-0 flex-1">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-surface/[.12] px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[.12em] text-[#DDE1E7]">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/60 bg-accent/[.18] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[.14em] text-navy">
             <Icone nom={action.icone} taille={14} />
             {action.etiquette}
           </span>
 
-          <h2 className="mt-3.5 font-title text-[23px] font-extrabold leading-tight tracking-tight text-white sm:text-[30px]">
+          <h2 className="mt-4 font-title text-[26px] font-bold leading-tight tracking-tight text-navy sm:text-[34px]">
             {action.titre}
           </h2>
 
-          <p className="mt-2.5 max-w-[42ch] text-[15px] leading-relaxed text-[#C9C2B2]">
+          <p className="mt-2.5 max-w-[42ch] text-[15px] leading-relaxed text-ink">
             {action.texte}
           </p>
 
           {action.details && (
-            <div className="mt-4 flex items-center gap-3.5 text-[13px] font-bold text-[#BFB8A8]">
+            <div className="mt-4 flex items-center gap-3.5 text-[13px] font-bold text-muted">
               {action.details.map((d, i) => (
                 <span key={d} className="flex items-center gap-3.5">
-                  {i > 0 && <span className="h-[3px] w-[3px] rounded-full bg-[#6B7380]" />}
+                  {i > 0 && <span className="h-[3px] w-[3px] rounded-full bg-accent/60" />}
                   {d}
                 </span>
               ))}
@@ -83,7 +77,7 @@ export default function CarteAction({ etat, intros, parcours, introFaite, onOuvr
           <button
             onClick={reprendre}
             disabled={cherche}
-            className="inline-flex items-center justify-center gap-2.5 whitespace-nowrap rounded-full bg-surface px-7 py-3.5 font-title text-[15px] font-extrabold text-navy transition hover:-translate-y-0.5 disabled:opacity-70 sm:px-8 sm:py-4"
+            className="btn whitespace-nowrap px-7 py-3.5"
           >
             {cherche ? 'Un instant…' : action.bouton}
             <Icone nom="fleche" taille={18} />
@@ -91,7 +85,7 @@ export default function CarteAction({ etat, intros, parcours, introFaite, onOuvr
         ) : (
           <Link
             to={action.lien}
-            className="inline-flex items-center justify-center gap-2.5 whitespace-nowrap rounded-full bg-surface px-7 py-3.5 font-title text-[15px] font-extrabold text-navy transition hover:-translate-y-0.5 sm:px-8 sm:py-4"
+            className="btn whitespace-nowrap px-7 py-3.5"
           >
             {action.bouton}
             <Icone nom="fleche" taille={18} />
@@ -140,7 +134,7 @@ function decider({ etat, intros, parcours, introFaite }) {
       etiquette: 'Ta prochaine action',
       icone: 'lecture',
       titre: enCours.title,
-      texte: `Module ${enCours.position} · ${enCours.done_count} leçon${enCours.done_count > 1 ? 's' : ''} sur ${enCours.lesson_count} déjà vue${enCours.done_count > 1 ? 's' : ''}. Reprends là où tu t'es arrêté.`,
+      texte: `Module ${parcours.indexOf(enCours) + 1} · ${enCours.done_count} leçon${enCours.done_count > 1 ? 's' : ''} sur ${enCours.lesson_count}.`,
       bouton: 'Reprendre',
       // Le bouton menait à « / », c'est-à-dire la page où l'on est déjà :
       // il ne se passait rien. C'est le module qu'il faut ouvrir.

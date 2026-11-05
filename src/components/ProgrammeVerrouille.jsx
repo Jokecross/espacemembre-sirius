@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import Icone from './Icone.jsx'
 import { supabase } from '../lib/supabase.js'
 
 /**
@@ -11,21 +12,28 @@ import { supabase } from '../lib/supabase.js'
  * de laisser l'élève buter sur des cadenas sans explication, on lui dit
  * quand et pourquoi, et on l'envoie construire son outil en attendant.
  */
+/** Le nombre vient du réglage du back-office : aucun texte ne l'écrit en dur. */
+export function videosOuvertes(n) {
+  if (n === 1) return 'ton premier module'
+  return n > 1 ? `tes ${n} premiers modules` : 'tes premiers modules'
+}
+
 export default function ProgrammeVerrouille({ etat }) {
   if (!etat || etat.dispense || etat.equipe) return null
   if (etat.jour >= etat.jour_deblocage) return null
 
   const restants = etat.jour_deblocage - etat.jour
-  const n = etat.modules_avant ?? 1
-  const ouverts = n > 1 ? `tes ${n} premiers modules` : 'ton premier module'
+  const ouverts = videosOuvertes(etat.modules_avant ?? 1)
 
   return (
     <section className="card flex flex-wrap items-center gap-4 border-accent/25 bg-gradient-to-r from-accent-pastel to-surface p-5">
-      <span className="grid h-12 w-12 flex-none place-items-center rounded-2xl bg-surface text-xl shadow-card">
-        🔓
+      <span className="grid h-12 w-12 flex-none place-items-center rounded-2xl border border-accent/50 bg-accent/[.16] text-navy">
+        <Icone nom="cadenas" taille={20} />
       </span>
 
-      <div className="min-w-0 flex-1">
+      {/* Largeur minimale : sous ce seuil, le bouton passe à la ligne au lieu
+          d'écraser le texte en un mot par ligne. */}
+      <div className="min-w-[200px] flex-1">
         <b className="block font-title font-extrabold text-navy">
           Tout ton programme s'ouvre au jour {etat.jour_deblocage} de ton workshop
         </b>
@@ -36,7 +44,7 @@ export default function ProgrammeVerrouille({ etat }) {
         </span>
       </div>
 
-      <Link to="/workshop" className="btn whitespace-nowrap px-5 py-2.5 text-sm">
+      <Link to="/workshop" className="btn w-full whitespace-nowrap px-5 py-2.5 text-[13px] sm:w-auto">
         {etat.jour === 0 ? 'Voir le workshop' : `Faire le jour ${etat.jour}`}
       </Link>
     </section>

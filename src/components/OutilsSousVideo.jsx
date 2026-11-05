@@ -48,7 +48,7 @@ export default function OutilsSousVideo() {
     <section className="card mt-5 p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-lg">Les outils dont tu as besoin</h2>
-        <Link to="/outils" className="text-sm font-bold text-accent hover:underline">
+        <Link to="/outils" className="text-sm font-semibold text-muted transition hover:text-navy">
           Tout voir →
         </Link>
       </div>

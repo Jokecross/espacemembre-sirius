@@ -59,8 +59,8 @@ export default function Modules({ member }) {
       <div className="flex items-center gap-4 sm:items-end sm:justify-between">
         <div className="min-w-0 flex-1">
           <p className="eyebrow">{dateDuJour()}</p>
-          <h1 className="mt-1.5 font-title text-[25px] font-extrabold tracking-tight text-navy sm:text-[31px]">
-            Bonjour {member?.first_name || ''}
+          <h1 className="mt-2 font-title text-[28px] font-bold tracking-tight text-navy sm:text-[38px]">
+            Bonjour <span className="mot-cle">{member?.first_name || ''}</span>
           </h1>
         </div>
 
@@ -88,7 +88,6 @@ export default function Modules({ member }) {
                 titre="Ton workshop"
                 detail={etat.jour >= 7 ? 'Terminé' : `Jour ${etat.jour} sur 7`}
                 texte={`${etat.jour}/7`}
-                couleur="#FFFFFF"
               />
             </>
           )}
@@ -123,8 +122,8 @@ export default function Modules({ member }) {
         <div className="flex items-end justify-between gap-4">
           <div>
             <p className="eyebrow">Ton espace</p>
-            <h2 className="mt-1 font-title text-[19px] font-extrabold tracking-tight text-navy">
-              Ton programme
+            <h2 className="mt-1 font-title text-[22px] font-bold tracking-tight text-navy sm:text-[26px]">
+              Ton <span className="mot-cle">programme</span>
             </h2>
           </div>
           <p className="text-[13px] text-muted">
@@ -230,6 +229,7 @@ function CarteModule({ id, module: m, numero, raison, ouvert, onToggle }) {
   const navigate = useNavigate()
   // Un module d'une seule vidéo : un appui l'ouvre, sans liste à déplier.
   const uneVideo = Number(m.lesson_count) === 1
+  const num = String(numero).padStart(2, '0')
 
   async function ouvrirVideo() {
     const { data } = await supabase.from('lessons').select('id').eq('module_id', m.id).limit(1).maybeSingle()
@@ -238,57 +238,58 @@ function CarteModule({ id, module: m, numero, raison, ouvert, onToggle }) {
 
   if (!m.unlocked) {
     return (
-      <div id={id} className="card flex items-center gap-3.5 p-4 opacity-[.55] sm:p-[18px_20px]">
-        <span className="grid h-[38px] w-[38px] flex-none place-items-center rounded-xl bg-canvas text-muted">
-          <Icone nom="cadenas" taille={17} />
-        </span>
+      <div id={id} className="ligne-video verrou">
+        <span className="num-video">{num}</span>
         <span className="min-w-0 flex-1">
-          <b className="block font-title text-[15px] font-extrabold text-navy">{m.title}</b>
-          <span className="text-[13px] text-muted">{raison}</span>
+          <b className="block font-title text-[15.5px] font-semibold text-muted sm:text-[16.5px]">{m.title}</b>
+          <span className="text-[13px] text-muted/70">{raison}</span>
+        </span>
+        <span className="rond-etat text-muted/60">
+          <Icone nom="cadenas" taille={16} />
         </span>
       </div>
     )
   }
 
+  const prochaine = ouvert && !fini
+
   return (
-    <section
-      id={id}
-      className={`overflow-hidden rounded-[18px] bg-surface transition ${
-        ouvert
-          ? 'border-[1.5px] border-accent/35 shadow-[0_10px_30px_rgba(174,0,0,.22)]'
-          : 'border border-line shadow-card hover:border-accent/25'
-      }`}
-    >
-      <button onClick={uneVideo ? ouvrirVideo : onToggle} className="flex w-full items-center gap-3.5 p-4 text-left sm:px-5">
-        <span
-          className={`grid h-[38px] w-[38px] flex-none place-items-center rounded-xl font-title text-sm font-extrabold ${
-            fini ? 'bg-success-bg text-success' : 'bg-accent text-on-accent'
-          }`}
-        >
-          {fini ? <Icone nom="valide" taille={18} epaisseur={2.2} /> : numero}
-        </span>
+    <section id={id}>
+      <button
+        onClick={uneVideo ? ouvrirVideo : onToggle}
+        className={`ligne-video ${prochaine ? 'prochaine' : ''}`}
+      >
+        <span className="num-video">{num}</span>
 
         <span className="min-w-0 flex-1">
-          <b className="block font-title text-[15px] font-extrabold text-navy">{m.title}</b>
-          <span className="text-[13px] text-muted">
+          <b className="block font-title text-[15.5px] font-semibold text-navy sm:text-[16.5px]">{m.title}</b>
+          <span className={`text-[13px] ${prochaine ? 'font-semibold text-navy' : 'text-muted'}`}>
             {uneVideo
-              ? fini ? 'Vidéo vue' : 'À regarder'
+              ? fini ? 'Vidéo vue' : prochaine ? 'Ta prochaine vidéo' : 'À regarder'
               : fini
               ? `${m.lesson_count} leçons · terminé`
               : `${m.done_count} leçon${m.done_count > 1 ? 's' : ''} sur ${m.lesson_count} · en cours`}
           </span>
         </span>
 
-        <Anneau
-          valeur={part}
-          taille={38}
-          epaisseur={4}
-          couleur={fini ? '#5BC98C' : '#AE0000'}
-          texte=""
-        />
+        {uneVideo ? (
+          <span
+            className={`rond-etat ${
+              fini ? 'bg-success-bg text-success' : 'bg-accent text-on-accent'
+            }`}
+          >
+            <Icone nom={fini ? 'valide' : 'lecture'} taille={fini ? 16 : 15} epaisseur={2.2} />
+          </span>
+        ) : (
+          <Anneau valeur={part} taille={38} epaisseur={4} texte="" />
+        )}
       </button>
 
-      {ouvert && !uneVideo && <ListeLecons moduleId={m.id} />}
+      {ouvert && !uneVideo && (
+        <div className="card mt-2">
+          <ListeLecons moduleId={m.id} />
+        </div>
+      )}
     </section>
   )
 }

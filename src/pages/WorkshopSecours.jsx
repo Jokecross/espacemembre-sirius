@@ -15,7 +15,7 @@ export default function WorkshopSecours() {
       >
         ← Tous les jours
       </Link>
-      <h1 className="mt-1 text-[25px] sm:text-[31px]">Si ça ne marche pas</h1>
+      <h1 className="mt-2 text-[28px] sm:text-[38px]">Si ça ne <span className="mot-cle">marche pas</span></h1>
       <p className="mt-2.5 max-w-[62ch] text-[15px] leading-relaxed">{SECOURS.intro}</p>
 
       {!reglages ? (
