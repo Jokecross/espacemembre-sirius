@@ -190,3 +190,17 @@
   .pill-success { @apply bg-success-bg text-success; }
   .pill-muted { @apply bg-canvas text-muted; }
 }
+
+/* La signature d'Anthony sur le contrat, et le contrat imprimé : fond blanc,
+   texte noir, sans les boutons. */
+.signature-sirius { font-family: Allura, cursive; }
+@media print {
+  html, body { background: #fff !important; }
+  body::before, body::after { display: none !important; }
+  .no-print { display: none !important; }
+  .contrat-page { max-width: none; padding: 0; }
+  .contrat-page .card { border: 0; box-shadow: none; background: #fff; }
+  .contrat-page, .contrat-page * { color: #111 !important; }
+  .contrat-page .bg-black, .contrat-page .bg-black * { background: #050607 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .contrat-page .bg-accent { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

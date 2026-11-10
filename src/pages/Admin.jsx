@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase.js'
+import { lienContrat } from '../lib/contrat.js'
 import Contenu from './Contenu.jsx'
 import WorkshopAdmin from './WorkshopAdmin.jsx'
 import SuiviWorkshop from './SuiviWorkshop.jsx'
@@ -86,8 +87,12 @@ function Invitations({ admin }) {
   const [label, setLabel] = useState('')
   const [busy, setBusy] = useState(false)
   const [copied, setCopied] = useState(null)
+  const [contrats, setContrats] = useState({})
+  const [dernier, setDernier] = useState(null)
 
   async function load() {
+    const { data: ct } = await supabase.from('contrats').select('token, prenom, nom, signe_at')
+    setContrats(Object.fromEntries((ct || []).map((x) => [x.token, x])))
     const [{ data: p }, { data: i }] = await Promise.all([
       supabase.from('plans').select('code, label, rank').order('rank'),
       supabase
@@ -127,6 +132,7 @@ function Invitations({ admin }) {
     if (data) {
       await load()
       copy(data.token)
+      setDernier(data.token)
     }
   }
 
@@ -134,9 +140,12 @@ function Invitations({ admin }) {
     return `${window.location.origin}/bienvenue/${token}`
   }
 
-  function copy(token) {
-    navigator.clipboard.writeText(linkFor(token))
-    setCopied(token)
+  function copy(token, quoi = 'lien') {
+    const texte = quoi === 'contrat' ? lienContrat(token)
+      : quoi === 'message' ? `Bienvenue dans le programme ! Voici ton accès : ${linkFor(token)}\n\nEt ton contrat de garantie « Premier client en 7 jours », déjà signé par Anthony, à signer de ton côté : ${lienContrat(token)}`
+      : linkFor(token)
+    navigator.clipboard.writeText(texte)
+    setCopied(`${quoi}:${token}`)
     setTimeout(() => setCopied(null), 2500)
   }
 
@@ -173,10 +182,29 @@ function Invitations({ admin }) {
         </form>
       </div>
 
+      {dernier && (
+        <div className="carte-phare mt-5">
+          <h2 className="text-[20px]">Le contrat de garantie</h2>
+          <p className="mt-1.5 max-w-[60ch] text-sm">
+            Envoie-le au client avec son lien d'accès : il est déjà signé par Anthony, le client le signe avec son doigt
+            en une minute. Tu vois dans la liste quand c'est fait.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button type="button" onClick={() => copy(dernier, 'message')} className="btn">
+              {copied === `message:${dernier}` ? '✓ Message copié' : 'Copier le message (accès + contrat)'}
+            </button>
+            <button type="button" onClick={() => copy(dernier, 'contrat')} className="btn-ghost">
+              {copied === `contrat:${dernier}` ? '✓ Lien copié' : 'Copier le lien du contrat'}
+            </button>
+            <a href={lienContrat(dernier)} target="_blank" rel="noopener" className="btn-ghost">Voir le contrat</a>
+          </div>
+        </div>
+      )}
+
       <PromptJ0 />
 
       <div className="card mt-5 overflow-x-auto">
-        <table className="w-full min-w-[720px] text-left text-sm">
+        <table className="w-full min-w-[820px] text-left text-sm">
           <thead className="border-b border-line text-xs uppercase tracking-wider text-muted">
             <tr>
               <th className="px-5 py-3 font-extrabold">Pour</th>
@@ -184,6 +212,7 @@ function Invitations({ admin }) {
               {admin && <th className="px-5 py-3 font-extrabold">Par</th>}
               <th className="px-5 py-3 font-extrabold">État</th>
               <th className="px-5 py-3 font-extrabold">Lien</th>
+              <th className="px-5 py-3 font-extrabold">Contrat</th>
             </tr>
           </thead>
           <tbody>
@@ -217,7 +246,18 @@ function Invitations({ admin }) {
                         onClick={() => copy(i.token)}
                         className="font-bold text-accent hover:underline"
                       >
-                        {copied === i.token ? '✓ copié' : 'Copier le lien'}
+                        {copied === `lien:${i.token}` ? '✓ copié' : 'Copier le lien'}
+                      </button>
+                    )}
+                  </td>
+                  <td className="px-5 py-3">
+                    {contrats[i.token] ? (
+                      <a href={lienContrat(i.token)} target="_blank" rel="noopener" className="font-bold text-success hover:underline">
+                        ✓ signé le {new Date(contrats[i.token].signe_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                      </a>
+                    ) : (
+                      <button onClick={() => copy(i.token, 'contrat')} className="font-bold text-navy hover:underline">
+                        {copied === `contrat:${i.token}` ? '✓ copié' : 'Copier le contrat'}
                       </button>
                     )}
                   </td>
@@ -226,7 +266,7 @@ function Invitations({ admin }) {
             })}
             {!invites.length && (
               <tr>
-                <td colSpan={admin ? 5 : 4} className="px-5 py-6 text-center text-muted">
+                <td colSpan={admin ? 6 : 5} className="px-5 py-6 text-center text-muted">
                   Aucune invitation pour l'instant.
                 </td>
               </tr>

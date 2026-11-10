@@ -6,6 +6,7 @@ import Modules from './pages/Modules.jsx'
 import Lesson from './pages/Lesson.jsx'
 import Admin from './pages/Admin.jsx'
 import Invite from './pages/Invite.jsx'
+import Contrat from './pages/Contrat.jsx'
 import Outils from './pages/Outils.jsx'
 import Workshop from './pages/Workshop.jsx'
 import WorkshopJour from './pages/WorkshopJour.jsx'
@@ -56,6 +57,13 @@ export default function App() {
       <Route path="/bienvenue/:token" element={<Invite />} />
     </Routes>
   )
+  // Le contrat de garantie s'ouvre sans compte, connecté ou non.
+  if (window.location.pathname.startsWith('/contrat/'))
+    return (
+      <Routes>
+        <Route path="/contrat/:token" element={<Contrat />} />
+      </Routes>
+    )
   // La page d'invitation ne s'affiche que tant qu'il n'y a pas de session.
   // Sans cette condition, l'élève qui vient de créer son accès resterait
   // devant le formulaire, connecté mais bloqué.
