@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
-import { ARTICLES, EDITEUR } from '../lib/contrat.js'
+import { ARTICLES, ARTICLES_V1, EDITEUR } from '../lib/contrat.js'
 import Monogramme from '../components/Monogramme.jsx'
 import Signature from '../components/Signature.jsx'
 
@@ -104,7 +104,7 @@ export default function Contrat() {
             )}
           </div>
 
-          {ARTICLES.map(([titre, texte], i) => (
+          {(c.version === 1 ? ARTICLES_V1 : ARTICLES).map(([titre, texte], i) => (
             <div key={titre}>
               <p className="text-[12.5px] font-semibold uppercase tracking-[0.14em] text-navy">
                 <span className="text-accent-light">Article {i + 1}</span> · {titre}

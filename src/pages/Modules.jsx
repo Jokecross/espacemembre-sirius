@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase.js'
 import Icone from '../components/Icone.jsx'
 import Anneau from '../components/Anneau.jsx'
 import CarteAction from '../components/CarteAction.jsx'
+import CarteGarantie from '../components/CarteGarantie.jsx'
 import BandeOutils from '../components/BandeOutils.jsx'
 import ProchainesEtapes from '../components/ProchainesEtapes.jsx'
 import ProgrammeVerrouille, { useEtatWorkshop } from '../components/ProgrammeVerrouille.jsx'
@@ -101,6 +102,9 @@ export default function Modules({ member }) {
           <TuileChiffre titre="Workshop" valeur={`J${etat.jour}`} total="7" />
         )}
       </div>
+
+      {/* ---------- La garantie, pour qui a signé le contrat ---------- */}
+      <CarteGarantie />
 
       {/* ---------- Quoi faire maintenant ---------- */}
       <CarteAction

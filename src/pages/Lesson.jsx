@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useSuiviLoom } from '../lib/suiviLoom.js'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
 import OutilsSousVideo from '../components/OutilsSousVideo.jsx'
@@ -12,6 +13,9 @@ export default function Lesson() {
   const [video, setVideo] = useState(null) // null = pas encore reçu ; { kind, url }
   const [done, setDone] = useState(false)
   const [error, setError] = useState('')
+  // Le pourcentage réellement regardé d'une vidéo Loom (null = pas suivi).
+  const [regarde, setRegarde] = useState(null)
+  const cadre = useRef(null)
   // Tout le programme de l'élève, pour la colonne de droite : savoir où on
   // en est et ce qui vient après compte autant que la vidéo elle-même.
   const [programme, setProgramme] = useState(null)
@@ -47,6 +51,8 @@ export default function Lesson() {
           .eq('lesson_id', data.id)
           .maybeSingle()
         if (alive) setDone(!!p)
+        const { data: vu } = await supabase.from('visionnages').select('pourcentage').eq('lesson_id', data.id).maybeSingle()
+        if (alive) setRegarde(vu ? Number(vu.pourcentage) : 0)
 
         const [{ data: mods }, { data: liste }, { data: vues }] = await Promise.all([
           supabase.rpc('my_modules'),
@@ -98,6 +104,15 @@ export default function Lesson() {
       marquer(true)
     }
   }
+
+  const loom = video?.kind === 'lecteur' && /loom\.com/.test(video.url || '')
+  useSuiviLoom(cadre, lessonId, loom, (pct) => {
+    setRegarde(pct)
+    if (pct >= 95 && !done) {
+      setDone(true)
+      marquer(true)
+    }
+  })
 
   function marquer(vue) {
     setProgramme((p) => p?.map((l) => (String(l.id) === String(lesson.id) ? { ...l, vue } : l)) ?? p)
@@ -162,6 +177,7 @@ export default function Lesson() {
               <div className="aspect-video overflow-hidden rounded-[18px] bg-black">
                 {video?.kind === 'lecteur' ? (
                   <iframe
+                    ref={cadre}
                     key={video.url}
                     src={video.url}
                     title={lesson.title}
@@ -191,15 +207,32 @@ export default function Lesson() {
 
           {/* Les actions : valider, puis avancer */}
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-            <button onClick={toggleDone} className={`${done ? 'btn-ghost' : 'btn'} w-full sm:w-auto`}>
-              {done ? (
-                <>
-                  <Icone nom="valide" taille={17} epaisseur={2.2} className="text-success" /> Leçon terminée
-                </>
-              ) : (
-                "J'ai terminé cette leçon"
-              )}
-            </button>
+            {loom ? (
+              /* Une vidéo Loom se coche toute seule : c'est la lecture réelle
+                 qui compte, pas un clic. */
+              <div className="w-full sm:w-auto sm:min-w-[300px]">
+                <div className="flex items-center justify-between gap-3 text-[13.5px] font-semibold">
+                  <span className={done ? 'text-success' : 'text-navy'}>
+                    {done ? '✓ Vidéo regardée' : `Regardée à ${Math.floor(regarde || 0)} %`}
+                  </span>
+                  {!done && <span className="text-muted">se coche à 95 %</span>}
+                </div>
+                <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-white/[.08]">
+                  <span className="block h-full rounded-full bg-accent transition-[width] duration-500"
+                    style={{ width: `${Math.min(100, done ? 100 : regarde || 0)}%` }} />
+                </span>
+              </div>
+            ) : (
+              <button onClick={toggleDone} className={`${done ? 'btn-ghost' : 'btn'} w-full sm:w-auto`}>
+                {done ? (
+                  <>
+                    <Icone nom="valide" taille={17} epaisseur={2.2} className="text-success" /> Leçon terminée
+                  </>
+                ) : (
+                  "J'ai terminé cette leçon"
+                )}
+              </button>
+            )}
 
             {video?.document && (
               <a href={video.document.url} target="_blank" rel="noopener" className="btn-ghost w-full sm:w-auto">

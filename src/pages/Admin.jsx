@@ -4,6 +4,7 @@ import { lienContrat } from '../lib/contrat.js'
 import Contenu from './Contenu.jsx'
 import WorkshopAdmin from './WorkshopAdmin.jsx'
 import SuiviWorkshop from './SuiviWorkshop.jsx'
+import Garanties from './Garanties.jsx'
 import PromptJ0 from '../components/PromptJ0.jsx'
 
 /* Ce que chacun voit du back-office. Un setter génère des invitations et
@@ -21,6 +22,7 @@ const ONGLETS = [
   ['ressources',  'Ressources',  false],
   ['workshop',    'Workshop 7 jours', false],
   ['suivi',       'Suivi des élèves', true],
+  ['garanties',   'Garanties',   true],
 ]
 
 export default function Admin({ role }) {
@@ -59,6 +61,7 @@ export default function Admin({ role }) {
         {tab === 'ressources' && <RessourcesAdmin />}
         {tab === 'workshop' && <WorkshopAdmin />}
         {tab === 'suivi' && <SuiviWorkshop />}
+        {tab === 'garanties' && <Garanties admin={admin} />}
       </div>
     </>
   )
