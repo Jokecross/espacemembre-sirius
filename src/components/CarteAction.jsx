@@ -13,8 +13,8 @@ import { APP, OUTIL } from '../lib/marque'
  * d'abord ce qui bloque (les introductions), puis ce qui est nouveau (le
  * workshop), puis la suite du programme.
  */
-export default function CarteAction({ etat, intros, parcours, introFaite, onOuvrirModule }) {
-  const action = decider({ etat, intros, parcours, introFaite })
+export default function CarteAction({ etat, intros, parcours, introFaite, onOuvrirModule, skool }) {
+  const action = decider({ etat, intros, parcours, introFaite, skool })
   const naviguer = useNavigate()
   const [cherche, setCherche] = useState(false)
   if (!action) return null
@@ -96,7 +96,7 @@ export default function CarteAction({ etat, intros, parcours, introFaite, onOuvr
   )
 }
 
-function decider({ etat, intros, parcours, introFaite }) {
+function decider({ etat, intros, parcours, introFaite, skool }) {
   // 1. Les introductions bloquent tout : rien d'autre ne compte.
   if (intros?.length && !introFaite) {
     return {
@@ -142,7 +142,17 @@ function decider({ etat, intros, parcours, introFaite }) {
     }
   }
 
-  // 4. Tout est fait.
+  // 4. Tout est fait. Un client venu du Skool n'a que le workshop ici.
+  if (skool) {
+    return {
+      etiquette: 'Bravo',
+      icone: 'valide',
+      titre: 'Tu as terminé ton workshop',
+      texte: `Tes 7 jours sont faits et ton ${APP} est prêt. La suite se passe dans tes modules vidéo, sur Skool.`,
+      bouton: 'Revoir le workshop',
+      lien: '/workshop',
+    }
+  }
   return {
     etiquette: 'Bravo',
     icone: 'valide',

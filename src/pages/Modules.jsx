@@ -8,6 +8,7 @@ import CarteGarantie from '../components/CarteGarantie.jsx'
 import BandeOutils from '../components/BandeOutils.jsx'
 import ProchainesEtapes from '../components/ProchainesEtapes.jsx'
 import ProgrammeVerrouille, { useEtatWorkshop } from '../components/ProgrammeVerrouille.jsx'
+import { FORMULE_SKOOL, LIEN_SKOOL } from '../lib/marque.js'
 
 /**
  * La page d'accueil de l'élève.
@@ -38,9 +39,13 @@ export default function Modules({ member }) {
 
   if (!modules) return <p className="text-muted">Chargement du programme…</p>
 
-  const intros = modules.filter((m) => m.is_intro)
-  const parcours = modules.filter((m) => !m.is_intro && !m.is_bonus)
-  const bonus = modules.filter((m) => m.is_bonus)
+  // Un client venu du Skool n'a que le workshop : ses modules vidéo sont
+  // sur Skool, on n'en montre aucun ici (la base les garde fermés).
+  const skool = member?.plan_code === FORMULE_SKOOL
+  const intros = skool ? [] : modules.filter((m) => m.is_intro)
+  const parcours = skool ? [] : modules.filter((m) => !m.is_intro && !m.is_bonus)
+  const bonus = skool ? [] : modules.filter((m) => m.is_bonus)
+  const partWorkshop = etat ? Math.min(etat.jour / 7, 1) : 0
   // Pourquoi un module est fermé : le jour 3 pas encore atteint, ou un
   // module que la formule ne contient pas.
   const raison =
@@ -68,22 +73,24 @@ export default function Modules({ member }) {
         {/* Sur téléphone : un seul anneau à côté du titre. Sur ordinateur :
             les deux compteurs, détaillés. */}
         <Anneau
-          valeur={avancement}
+          valeur={skool ? partWorkshop : avancement}
           taille={58}
-          texte={`${Math.round(avancement * 100)}%`}
+          texte={`${Math.round((skool ? partWorkshop : avancement) * 100)}%`}
           className="sm:hidden"
         />
 
         <div className="hidden items-center gap-6 sm:flex">
-          <Compteur
-            valeur={avancement}
-            titre="Programme"
-            detail={`${faits} / ${parcours.length} modules`}
-            texte={`${Math.round(avancement * 100)}%`}
-          />
+          {!skool && (
+            <Compteur
+              valeur={avancement}
+              titre="Programme"
+              detail={`${faits} / ${parcours.length} modules`}
+              texte={`${Math.round(avancement * 100)}%`}
+            />
+          )}
           {etat && !etat.dispense && !etat.equipe && (
             <>
-              <span className="h-10 w-px bg-line" />
+              {!skool && <span className="h-10 w-px bg-line" />}
               <Compteur
                 valeur={etat.jour / 7}
                 titre="Ton workshop"
@@ -97,7 +104,7 @@ export default function Modules({ member }) {
 
       {/* Deux tuiles chiffrées, seulement sur téléphone */}
       <div className="mt-4 flex gap-2.5 sm:hidden">
-        <TuileChiffre titre="Programme" valeur={faits} total={parcours.length} />
+        {!skool && <TuileChiffre titre="Programme" valeur={faits} total={parcours.length} />}
         {etat && !etat.dispense && !etat.equipe && (
           <TuileChiffre titre="Workshop" valeur={`J${etat.jour}`} total="7" />
         )}
@@ -112,6 +119,7 @@ export default function Modules({ member }) {
         intros={intros}
         parcours={parcours}
         introFaite
+        skool={skool}
         onOuvrirModule={(id) => {
           setOuvert(id)
           document.getElementById(`module-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -121,7 +129,28 @@ export default function Modules({ member }) {
       {/* ---------- Les outils ---------- */}
       <BandeOutils />
 
+      {/* ---------- Les modules vidéo d'un client Skool : sur Skool ---------- */}
+      {skool && (
+        <section className="card mt-10 flex flex-wrap items-center gap-4 p-5">
+          <span className="grid h-12 w-12 flex-none place-items-center rounded-2xl border border-accent/50 bg-accent/[.16] text-navy">
+            <Icone nom="lecture" taille={20} />
+          </span>
+          <div className="min-w-[200px] flex-1">
+            <b className="block font-title font-extrabold text-navy">Tes modules vidéo sont sur Skool</b>
+            <span className="text-sm">
+              Ici, tu fais ton workshop de 7 jours. Tes vidéos, tu les regardes dans ton espace Skool.
+            </span>
+          </div>
+          {LIEN_SKOOL && (
+            <a href={LIEN_SKOOL} target="_blank" rel="noopener" className="btn w-full whitespace-nowrap px-5 py-2.5 text-[13px] sm:w-auto">
+              Ouvrir Skool
+            </a>
+          )}
+        </section>
+      )}
+
       {/* ---------- Le programme ---------- */}
+      {!skool && (
       <section className="mt-10">
         <div className="flex items-end justify-between gap-4">
           <div>
@@ -155,6 +184,7 @@ export default function Modules({ member }) {
           ))}
         </div>
       </section>
+      )}
 
       {/* ---------- Les bonus ---------- */}
       {bonus.length > 0 && (

@@ -15,6 +15,7 @@ import BandeauWorkshop from './components/BandeauWorkshop.jsx'
 import Coquille from './components/Coquille.jsx'
 import GuideBienvenue from './components/GuideBienvenue.jsx'
 import TourGuide from './components/TourGuide.jsx'
+import { FORMULE_SKOOL } from './lib/marque.js'
 import { useEtatWorkshop } from './components/ProgrammeVerrouille.jsx'
 import { MARQUE, OFFRE } from './lib/marque'
 
@@ -91,11 +92,12 @@ export default function App() {
       {guideOuvert && (
         <GuideBienvenue
           etat={guide}
+          skool={member.plan_code === FORMULE_SKOOL}
           onFini={() => setGuide({ ...guide, a_faire: false, tour_a_faire: true })}
         />
       )}
       {tourOuvert && (
-        <TourGuide onFini={() => setGuide({ ...guide, tour_a_faire: false })} />
+        <TourGuide skool={member.plan_code === FORMULE_SKOOL} onFini={() => setGuide({ ...guide, tour_a_faire: false })} />
       )}
 
       <div

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase.js'
 import { lienContrat } from '../lib/contrat.js'
+import { FORMULE_SKOOL } from '../lib/marque.js'
 import Contenu from './Contenu.jsx'
 import WorkshopAdmin from './WorkshopAdmin.jsx'
 import SuiviWorkshop from './SuiviWorkshop.jsx'
@@ -139,6 +140,9 @@ function Invitations({ admin }) {
     }
   }
 
+  // Un client venu du Skool n'a pas de contrat de garantie.
+  const sansContrat = (token) => invites.find((i) => i.token === token)?.plan_code === FORMULE_SKOOL
+
   function linkFor(token) {
     return `${window.location.origin}/bienvenue/${token}`
   }
@@ -185,7 +189,22 @@ function Invitations({ admin }) {
         </form>
       </div>
 
-      {dernier && (
+      {dernier && sansContrat(dernier) && (
+        <div className="carte-phare mt-5">
+          <h2 className="text-[20px]">Client Skool : le workshop seul</h2>
+          <p className="mt-1.5 max-w-[60ch] text-sm">
+            Le lien est copié : envoie-le au client. Il crée son compte et retrouve son workshop de 7 jours.
+            Ses modules vidéo sont sur Skool, et il n'a pas de contrat de garantie à signer.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button type="button" onClick={() => copy(dernier)} className="btn">
+              {copied === `lien:${dernier}` ? '✓ Lien copié' : 'Copier le lien d\'accès'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {dernier && !sansContrat(dernier) && (
         <div className="carte-phare mt-5">
           <h2 className="text-[20px]">Le contrat de garantie</h2>
           <p className="mt-1.5 max-w-[60ch] text-sm">
@@ -254,7 +273,9 @@ function Invitations({ admin }) {
                     )}
                   </td>
                   <td className="px-5 py-3">
-                    {contrats[i.token] ? (
+                    {i.plan_code === FORMULE_SKOOL ? (
+                      <span className="text-muted">Pas de contrat</span>
+                    ) : contrats[i.token] ? (
                       <a href={lienContrat(i.token)} target="_blank" rel="noopener" className="font-bold text-success hover:underline">
                         ✓ signé le {new Date(contrats[i.token].signe_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                       </a>
@@ -682,7 +703,8 @@ function Formules() {
       supabase.from('plans').select('code, label, rank').order('rank'),
     ])
     setMatrix(mx || [])
-    setPlans(p || [])
+    // La formule Skool n'a pas de modules ici : pas de colonne à cocher.
+    setPlans((p || []).filter((x) => x.code !== FORMULE_SKOOL))
   }
 
   useEffect(() => {

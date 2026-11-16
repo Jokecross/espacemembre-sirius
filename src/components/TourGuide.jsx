@@ -34,13 +34,22 @@ const ARRETS = [
   },
 ]
 
+// Un client venu du Skool n'a pas de modules vidéo ici : son accueil ne
+// montre que son avancement et sa prochaine action.
+const ARRET_SKOOL = {
+  cle: 'accueil',
+  titre: 'Ton accueil',
+  texte:
+    "C'est ici que tu vois où tu en es et ce que tu as à faire aujourd'hui. Tes modules vidéo, eux, sont sur Skool.",
+}
+
 const MARGE = 10
 
-export default function TourGuide({ onFini }) {
+export default function TourGuide({ onFini, skool }) {
   const [i, setI] = useState(0)
   const [zone, setZone] = useState(null)
 
-  const arret = ARRETS[i]
+  const arret = skool && i === 0 ? ARRET_SKOOL : ARRETS[i]
 
   // La cible change selon la largeur : barre latérale sur ordinateur,
   // barre d'onglets sur téléphone. On prend celle qui est à l'écran.

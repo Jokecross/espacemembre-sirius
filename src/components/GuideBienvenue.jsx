@@ -18,8 +18,11 @@ const TOTAL = 4
  * programme. Le seul passage obligé est la capture de l'outil, et
  * seulement pour qui dit ne pas avoir collé le prompt pendant l'appel.
  */
-export default function GuideBienvenue({ etat, onFini }) {
-  const [etape, setEtape] = useState(Math.min(etat.etape || 0, TOTAL - 1))
+export default function GuideBienvenue({ etat, onFini, skool }) {
+  // Un client venu du Skool n'a pas la vidéo d'introduction : ses modules
+  // sont sur Skool, le guide s'arrête au workshop.
+  const total = skool ? TOTAL - 1 : TOTAL
+  const [etape, setEtape] = useState(Math.min(etat.etape || 0, total - 1))
 
   const avancer = useCallback((suivante, promptRecu) => {
     setEtape(suivante)
@@ -38,9 +41,9 @@ export default function GuideBienvenue({ etat, onFini }) {
     <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-black/45 backdrop-blur-[6px]">
       <div className="flex min-h-full items-start justify-center p-4 sm:items-center sm:p-6">
         <div className="card w-full max-w-xl p-7 shadow-[0_32px_80px_-24px_rgba(0,0,0,.55)] sm:p-9">
-          <Compteur etape={etape} />
+          <Compteur etape={etape} total={total} />
 
-          {etape === 0 && <Bienvenue prenom={etat.prenom} onSuivant={() => avancer(1)} />}
+          {etape === 0 && <Bienvenue prenom={etat.prenom} skool={skool} onSuivant={() => avancer(1)} />}
           {etape === 1 && (
             <Prompt
               prompt={etat.prompt_j0}
@@ -49,8 +52,8 @@ export default function GuideBienvenue({ etat, onFini }) {
               onSuivant={(recu) => avancer(2, recu)}
             />
           )}
-          {etape === 2 && <Workshop onSuivant={() => avancer(3)} />}
-          {etape === 3 && <Video lecons={etat.lecons_intro || []} onFini={terminer} />}
+          {etape === 2 && <Workshop skool={skool} onSuivant={skool ? terminer : () => avancer(3)} />}
+          {etape === 3 && !skool && <Video lecons={etat.lecons_intro || []} onFini={terminer} />}
         </div>
       </div>
     </div>
@@ -59,14 +62,14 @@ export default function GuideBienvenue({ etat, onFini }) {
 
 /* ---------- Le compteur, commun aux trois cartes ---------- */
 
-function Compteur({ etape }) {
+function Compteur({ etape, total }) {
   return (
     <div className="flex items-center gap-3">
       <span className="eyebrow">
-        Étape {etape + 1} / {TOTAL}
+        Étape {etape + 1} / {total}
       </span>
       <span className="flex flex-1 gap-1.5">
-        {Array.from({ length: TOTAL }, (_, i) => (
+        {Array.from({ length: total }, (_, i) => (
           <span
             key={i}
             className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
@@ -81,7 +84,7 @@ function Compteur({ etape }) {
 
 /* ---------- 1. La bienvenue ---------- */
 
-function Bienvenue({ prenom, onSuivant }) {
+function Bienvenue({ prenom, onSuivant, skool }) {
   return (
     <>
       <h1 className="mt-5 text-[26px] leading-tight sm:text-3xl">
@@ -98,8 +101,10 @@ function Bienvenue({ prenom, onSuivant }) {
       </p>
 
       <p className="mt-3 text-[15px] leading-relaxed">
-        Ce guide prend deux minutes. Il te montre par où commencer, te redonne le premier
-        prompt de ton {APP}, et te fait regarder la vidéo qui ouvre le programme.
+        Ce guide prend deux minutes.{' '}
+        {skool
+          ? `Il te montre par où commencer et te redonne le premier prompt de ton ${APP}.`
+          : `Il te montre par où commencer, te redonne le premier prompt de ton ${APP}, et te fait regarder la vidéo qui ouvre le programme.`}{' '}
         Ensuite, tout l'espace est à toi.
       </p>
 
@@ -305,7 +310,7 @@ function Choix({ actif, onClick, children }) {
 
 /* ---------- 3. Le workshop ---------- */
 
-function Workshop({ onSuivant }) {
+function Workshop({ onSuivant, skool }) {
   return (
     <>
       <h1 className="mt-5 text-[26px] leading-tight sm:text-3xl">
@@ -326,6 +331,15 @@ function Workshop({ onSuivant }) {
         manque à ton {APP}.
       </p>
 
+      {skool ? (
+        <div className="mt-5 rounded-2xl border-[1.5px] border-accent/60 bg-canvas p-5">
+          <p className="font-title font-bold text-navy">Tes modules vidéo sont sur Skool</p>
+          <p className="mt-1.5 text-[15px] leading-relaxed">
+            Ici, tu fais ton workshop, un jour après l'autre. Tes vidéos, tu les regardes
+            dans ton espace Skool.
+          </p>
+        </div>
+      ) : (
       <div className="mt-5 rounded-2xl border-[1.5px] border-accent/60 bg-canvas p-5">
         <p className="font-title font-bold text-navy">Les trois premiers jours comptent double</p>
         <p className="mt-1.5 text-[15px] leading-relaxed">
@@ -335,9 +349,10 @@ function Workshop({ onSuivant }) {
           commencer dès ce soir.
         </p>
       </div>
+      )}
 
       <button onClick={onSuivant} className="btn mt-7 w-full">
-        Suivant
+        {skool ? 'Entrer dans mon espace' : 'Suivant'}
       </button>
     </>
   )

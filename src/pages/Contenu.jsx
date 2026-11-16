@@ -178,7 +178,8 @@ export default function Contenu() {
 
 /** Coche un module dans toutes les formules (les doublons sont ignorés). */
 async function ouvrirAuxFormules(moduleId) {
-  const { data: plans } = await supabase.from('plans').select('code')
+  // La formule Skool ne contient aucun module : ses vidéos sont sur Skool.
+  const { data: plans } = await supabase.from('plans').select('code').neq('code', 'skool')
   if (!plans?.length) return
   await supabase
     .from('plan_modules')

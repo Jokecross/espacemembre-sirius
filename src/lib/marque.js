@@ -15,3 +15,9 @@ export const OUTIL = 'Base44'
 // Ce que ces prompts construisent, étape par étape. Écrit pour se lire
 // après « ton » : « ton outil Kairo prend forme ».
 export const APP = 'outil Kairo'
+
+// La formule des clients venus du Skool : le workshop seul, leurs modules
+// vidéo sont sur Skool. Pas de contrat de garantie pour eux.
+export const FORMULE_SKOOL = 'skool'
+// Le lien du groupe Skool, affiché sur leur accueil. Vide = pas de bouton.
+export const LIEN_SKOOL = ''
